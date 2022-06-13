@@ -4,16 +4,19 @@
 
 # Requirement
 <h3> 1. Geting and displaying user's current location <h3>
+
 - Ask/check for access permission for location information
 - Geocoding: longitude, latitude to address(city, state, country)
 
 <h3> 2. User Profile <h3>
+
 - Allow user to select image from photo library to set as profile image
 - Save photo in document directory
 - Save photo id in core data
 - Load and display saved photo
 
 <h3> 3. Multithreading <h3>
+
 - Use subthread if applicable
 
 # Contribution

@@ -1,4 +1,4 @@
-# User Location and Profile
+# User Location and Profilee
 - Display user's current location in human-readable format(city, state, country)
 - Allow user to set profile image
 

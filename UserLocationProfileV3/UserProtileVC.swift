@@ -21,6 +21,10 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
         
         imagePicker.delegate = self
         
+        profileImageBtn.layer.cornerRadius = profileImageBtn.frame.width/2
+        profileImageBtn.layer.masksToBounds = true
+        profileImageBtn.layer.borderWidth = 2
+        
         loadProfileImageIfAvailable()
 
     }
@@ -47,6 +51,8 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
                             JKLog.log(message: "\(Thread.current)") // MARK: Main queue in global queue
                             
                             self.profileImageBtn.setBackgroundImage(image, for: .normal)
+                            self.profileImageBtn.setTitle("", for: .normal)
+
                         }
                         self.currentProfileImageID = targetFile
                     }
@@ -57,9 +63,9 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
 
             }
             print("image loaded!")
-            DispatchQueue.main.async {
-                self.profileImageBtn.setTitle("", for: .normal)
-            }
+//            DispatchQueue.main.async {
+//                self.profileImageBtn.setTitle("", for: .normal)
+//            }
 
         } // end of subthread
 
@@ -71,7 +77,7 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     @IBAction func profileImageBtnTouched(_ sender: UIButton) {
         let currentUsername = "test1" // TODO: properly get current username
         
-        var alertDialog = UIAlertController(title: "Choose Image From", message: "If you want to take a new photo, select Open Camera to open your camera. If you want to choose a photo from photo gallery, select Open Gallery to choose an existing photo.", preferredStyle: .alert)
+        let alertDialog = UIAlertController(title: "Profile Image", message: "If you want to take a new photo, select Open Camera to open your camera. If you want to choose a photo from photo gallery, select Open Gallery to choose an existing photo.", preferredStyle: .alert)
         let camera = UIAlertAction(title: "Open Camera", style: .default, handler: { (action) in
             self.openCamera()
         })
@@ -98,7 +104,6 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     
     func openCamera() {
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            imagePicker.allowsEditing = false
             imagePicker.sourceType = .camera
             imagePicker.cameraCaptureMode = .photo
             present(imagePicker, animated: true, completion: nil)
@@ -111,7 +116,6 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     }
     
     func openGallery() {
-        imagePicker.allowsEditing = false
         imagePicker.sourceType = .photoLibrary
         present(imagePicker, animated: true, completion: nil)
         
@@ -119,6 +123,10 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         dismiss(animated: true, completion: nil)
+    }
+    
+    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
+        JKLog.log(message: "vc shown")
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
@@ -133,7 +141,7 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
         let currentUsername = "test1" // TODO: properly get current username
         let imageIDString = "\(currentUsername)_\(Date())"
 
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .utility).async { // MARK: change it to sync
             JKLog.log(message: "\(Thread.current)") // MARK: global queue
 
             // SAVE INTO COREDATA

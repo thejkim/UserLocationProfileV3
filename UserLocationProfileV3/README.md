@@ -47,5 +47,9 @@
         2. Saving user profile image information into Core Data and document directory
         3. Loading user profile image from document directory
 
+[Jun 13]
+- Unnecessary subthread removed
+- Minor edits
+
 [TODO]
 - dismiss LocationServiceAuthorizationVC once user made decision on location service permission

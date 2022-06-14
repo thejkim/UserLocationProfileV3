@@ -8,7 +8,7 @@
 import UIKit
 import CoreLocation
 
-class LocationDisplayVC: UIViewController, ST_LocationManagerDelegate {
+class LocationDisplayVC: UIViewController, ST_LocationManagerDelegate { // TODO: read about naming convernsion
 
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var stateNameLabel: UILabel!
@@ -47,7 +47,7 @@ class LocationDisplayVC: UIViewController, ST_LocationManagerDelegate {
             print("\(locationManager.checkAuthorizationStatus())")
         }
         
-        locationManager.delegate = self
+        locationManager.delegate = self // make new instance of delegate, not changing/assigning to old one
         
 
     }

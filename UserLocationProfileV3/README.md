@@ -1,6 +1,8 @@
 # User Location and Profile
 - Display user's current location in human-readable format(city, state, country)
 - Allow user to set profile image
+- Display articles for current country
+- Load article url in-app
 
 # Requirement
 <h3> 1. Geting and displaying user's current location <h3>
@@ -50,6 +52,22 @@
 [Jun 13]
 - Unnecessary subthread removed
 - Minor edits
+
+[Jun 14]
+- manage image content mode: set the user profile button's background image to be scaleAspectFill mode
+
+[Jun 15]
+- send GET Request to fetch articles for current location's country from newsapi.org
+- download images, uploading up to 10 collected images in document directory
+- remove old image if it reaches limit to download new file
+- tableview to display article implemented
+- open article link and load it in webview
+- multithreading applied
+
+[Jun 16]
+- Reachability included: checks network reachability
+- Uploading up to 10 collected images in document directory updated
+    - once tapped to first 10 articles while loading articles
 
 [TODO]
 - dismiss LocationServiceAuthorizationVC once user made decision on location service permission

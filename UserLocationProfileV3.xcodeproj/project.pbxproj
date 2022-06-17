@@ -14,7 +14,7 @@
 		743599872855BF94008800CE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 743599852855BF94008800CE /* LaunchScreen.storyboard */; };
 		743599902855BFD3008800CE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7435998E2855BFD3008800CE /* Main.storyboard */; };
 		743599972855BFFA008800CE /* JKLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743599912855BFF9008800CE /* JKLog.swift */; };
-		743599982855BFFA008800CE /* ST_LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743599922855BFFA008800CE /* ST_LocationManager.swift */; };
+		743599982855BFFA008800CE /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743599922855BFFA008800CE /* LocationManager.swift */; };
 		743599992855BFFA008800CE /* JKAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743599932855BFFA008800CE /* JKAlert.swift */; };
 		7435999A2855BFFA008800CE /* LocationServiceAuthorizationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743599942855BFFA008800CE /* LocationServiceAuthorizationVC.swift */; };
 		7435999B2855BFFA008800CE /* UserProtileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743599952855BFFA008800CE /* UserProtileVC.swift */; };
@@ -23,6 +23,12 @@
 		743599A028567DF5008800CE /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7435999F28567DF5008800CE /* LoginVC.swift */; };
 		743599A328567F71008800CE /* UserProfile+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743599A128567F71008800CE /* UserProfile+CoreDataClass.swift */; };
 		743599A428567F71008800CE /* UserProfile+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743599A228567F71008800CE /* UserProfile+CoreDataProperties.swift */; };
+		745AEF1F2859EECC00F658DE /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745AEF1E2859EECC00F658DE /* Article.swift */; };
+		745AEF212859F8A300F658DE /* ArticleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745AEF202859F8A300F658DE /* ArticleCell.swift */; };
+		745AEF23285A010000F658DE /* Key.plist in Resources */ = {isa = PBXBuildFile; fileRef = 745AEF22285A010000F658DE /* Key.plist */; };
+		745AEF25285A015600F658DE /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745AEF24285A015600F658DE /* Constants.swift */; };
+		745AEF27285A088100F658DE /* LoadUrlVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745AEF26285A088100F658DE /* LoadUrlVC.swift */; };
+		745AEF2D285B383700F658DE /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745AEF2C285B383700F658DE /* Reachability.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,7 +41,7 @@
 		743599882855BF94008800CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7435998F2855BFD3008800CE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		743599912855BFF9008800CE /* JKLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JKLog.swift; sourceTree = "<group>"; };
-		743599922855BFFA008800CE /* ST_LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ST_LocationManager.swift; sourceTree = "<group>"; };
+		743599922855BFFA008800CE /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		743599932855BFFA008800CE /* JKAlert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JKAlert.swift; sourceTree = "<group>"; };
 		743599942855BFFA008800CE /* LocationServiceAuthorizationVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationServiceAuthorizationVC.swift; sourceTree = "<group>"; };
 		743599952855BFFA008800CE /* UserProtileVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserProtileVC.swift; sourceTree = "<group>"; };
@@ -44,6 +50,12 @@
 		7435999F28567DF5008800CE /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		743599A128567F71008800CE /* UserProfile+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserProfile+CoreDataClass.swift"; sourceTree = "<group>"; };
 		743599A228567F71008800CE /* UserProfile+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserProfile+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		745AEF1E2859EECC00F658DE /* Article.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Article.swift; sourceTree = "<group>"; };
+		745AEF202859F8A300F658DE /* ArticleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleCell.swift; sourceTree = "<group>"; };
+		745AEF22285A010000F658DE /* Key.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Key.plist; sourceTree = "<group>"; };
+		745AEF24285A015600F658DE /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		745AEF26285A088100F658DE /* LoadUrlVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadUrlVC.swift; sourceTree = "<group>"; };
+		745AEF2C285B383700F658DE /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,16 +93,22 @@
 				743599772855BF8F008800CE /* AppDelegate.swift */,
 				743599792855BF8F008800CE /* SceneDelegate.swift */,
 				7435998E2855BFD3008800CE /* Main.storyboard */,
+				745AEF26285A088100F658DE /* LoadUrlVC.swift */,
 				7435999F28567DF5008800CE /* LoginVC.swift */,
 				743599832855BF94008800CE /* Assets.xcassets */,
 				743599852855BF94008800CE /* LaunchScreen.storyboard */,
+				745AEF202859F8A300F658DE /* ArticleCell.swift */,
 				743599882855BF94008800CE /* Info.plist */,
 				743599932855BFFA008800CE /* JKAlert.swift */,
 				743599912855BFF9008800CE /* JKLog.swift */,
+				745AEF2C285B383700F658DE /* Reachability.swift */,
 				743599962855BFFA008800CE /* LocationDisplayVC.swift */,
+				745AEF24285A015600F658DE /* Constants.swift */,
+				745AEF1E2859EECC00F658DE /* Article.swift */,
 				743599942855BFFA008800CE /* LocationServiceAuthorizationVC.swift */,
-				743599922855BFFA008800CE /* ST_LocationManager.swift */,
+				743599922855BFFA008800CE /* LocationManager.swift */,
 				743599952855BFFA008800CE /* UserProtileVC.swift */,
+				745AEF22285A010000F658DE /* Key.plist */,
 				7435999D285674F7008800CE /* CoreDataManager.swift */,
 				743599802855BF8F008800CE /* UserLocationProfileV3.xcdatamodeld */,
 			);
@@ -154,6 +172,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				745AEF23285A010000F658DE /* Key.plist in Resources */,
 				743599902855BFD3008800CE /* Main.storyboard in Resources */,
 				743599872855BF94008800CE /* LaunchScreen.storyboard in Resources */,
 				743599842855BF94008800CE /* Assets.xcassets in Resources */,
@@ -167,16 +186,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				745AEF1F2859EECC00F658DE /* Article.swift in Sources */,
 				743599A028567DF5008800CE /* LoginVC.swift in Sources */,
 				743599A428567F71008800CE /* UserProfile+CoreDataProperties.swift in Sources */,
 				743599822855BF8F008800CE /* UserLocationProfileV3.xcdatamodeld in Sources */,
-				743599982855BFFA008800CE /* ST_LocationManager.swift in Sources */,
+				745AEF27285A088100F658DE /* LoadUrlVC.swift in Sources */,
+				743599982855BFFA008800CE /* LocationManager.swift in Sources */,
+				745AEF212859F8A300F658DE /* ArticleCell.swift in Sources */,
 				7435999A2855BFFA008800CE /* LocationServiceAuthorizationVC.swift in Sources */,
+				745AEF25285A015600F658DE /* Constants.swift in Sources */,
 				7435999C2855BFFA008800CE /* LocationDisplayVC.swift in Sources */,
 				743599782855BF8F008800CE /* AppDelegate.swift in Sources */,
 				7435999B2855BFFA008800CE /* UserProtileVC.swift in Sources */,
 				743599972855BFFA008800CE /* JKLog.swift in Sources */,
 				7435997A2855BF8F008800CE /* SceneDelegate.swift in Sources */,
+				745AEF2D285B383700F658DE /* Reachability.swift in Sources */,
 				7435999E285674F7008800CE /* CoreDataManager.swift in Sources */,
 				743599A328567F71008800CE /* UserProfile+CoreDataClass.swift in Sources */,
 				743599992855BFFA008800CE /* JKAlert.swift in Sources */,

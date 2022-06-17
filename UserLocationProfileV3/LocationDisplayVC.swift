@@ -8,17 +8,30 @@
 import UIKit
 import CoreLocation
 
-class LocationDisplayVC: UIViewController, ST_LocationManagerDelegate { // TODO: read about naming convernsion
+class LocationDisplayVC: UIViewController, LocationManagerDelegate { 
 
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var stateNameLabel: UILabel!
     @IBOutlet weak var countryNameLabel: UILabel!
+    @IBOutlet weak var articlesTV: UITableView!
     
     let locationManager = ST_LocationManager.shared
+    var articles = [Article]()
+    var apiKey: String?
+    var targetUrlStr: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if let path = Bundle.main.path(forResource: Constants.KEY_PLIST_NAME, ofType: "plist") {
+            if let dic = NSDictionary(contentsOfFile: path) as? Dictionary<String, String> {
+                if let value = dic[Constants.API_KEY] {
+                    apiKey = value
+                }
+            }
+        }
+        
+        // MARK: Check Location Service Authorization Status
         switch locationManager.checkAuthorizationStatus() {
         case .notDetermined:
             print("notDetermined")
@@ -52,14 +65,319 @@ class LocationDisplayVC: UIViewController, ST_LocationManagerDelegate { // TODO:
 
     }
     
-    func locationDidUpdateWith(city: String, state: String, country: String) {
-//        if Thread.isMainThread {
-//            print("main!")
-//        }
+    func locationDidUpdateWith(city: String, state: String, country: String, countryCode: String) {
         JKLog.log(message: "\(Thread.current)")
 
         cityNameLabel.text = city
         stateNameLabel.text = state
         countryNameLabel.text = country
+        
+        fetchArticlesFor(currentCountry: countryCode.lowercased())
+        
     }
+    
+    func fetchArticlesFor(currentCountry countryCode: String) {// TODO:
+        let baseURLStr = "https://newsapi.org"
+        let endpointURLStr = "/v2/top-headlines"
+        guard let key = apiKey else {return}
+        let params = "?country=\(countryCode)&apiKey=\(key)"
+        let urlStr = "\(baseURLStr)\(endpointURLStr)\(params)"
+
+        guard let url = URL(string: urlStr) else { return }
+
+        // MARK: Network, Server Checks
+        // try? url.checkResourceIsReachable()
+        let reachability = try? Reachability()
+        if let isReachable = reachability?.isReachable {
+            if !isReachable {
+                let alert = UIAlertController(title: "Network Unreachable", message: "We cannot reach out the API service", preferredStyle: .alert)
+                let ok = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+                alert.addAction(ok)
+                self.present(alert, animated: true, completion: nil)
+            }
+        }
+//        if let isServerAvailable = reachability?.isInternetAvailable(websiteToPing: baseURLStr) {
+//            if !isServerAvailable {
+//                let alert = UIAlertController(title: "Server Unavailable", message: "We cannot reach out the API service", preferredStyle: .alert)
+//                let ok = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+//                alert.addAction(ok)
+//                self.present(alert, animated: true, completion: nil)
+//            }
+//        }
+        
+        // MARK: Request Setup
+        var request = URLRequest(url: url)
+
+        request.httpMethod = "GET"
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        
+        let task = URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) -> Void in
+            JKLog.log(message: "dataTask::: \(Thread.current)")
+            
+            guard let data = data else { return }
+            
+            do {
+                let jsondata = try JSONSerialization.jsonObject(with: data, options: [])
+                
+                let dic = jsondata as! Dictionary<String, Any>
+                guard let fetchedArticles = dic["articles"] as? Array<Dictionary<String, Any>> else { return }
+                for article in fetchedArticles {
+                    let newArticle = article
+
+                    let newArticleInstance = Article()
+                    newArticleInstance.author = newArticle["author"] as? String ?? "N/A"
+                    newArticleInstance.content = newArticle["content"] as? String ?? "N/A"
+                    newArticleInstance.description = newArticle["description"] as? String ?? "N/A"
+                    newArticleInstance.publishedAt = newArticle["publishedAt"] as? String ?? "N/A"
+                    
+                    // get source id, name
+                    guard let source = newArticle["source"] as? Dictionary<String, Any> else { return } // NSDictionary
+                    newArticleInstance.sourceID = source["id"] as? String ?? "N/A"
+                    newArticleInstance.sourceName = source["name"] as? String ?? "N/A"
+                    
+                    newArticleInstance.title = newArticle["title"] as? String ?? "N/A"
+                    newArticleInstance.url = newArticle["url"] as? String ?? "N/A"
+                    newArticleInstance.urlToImage = newArticle["urlToImage"] as? String ?? "N/A"
+                    
+                    // append
+                    self.articles.append(newArticleInstance)
+                    
+//                    DispatchQueue.main.async { // if getting one article by one
+//                        self.articlesTV.reloadData()
+//                    }
+                    
+                }
+                DispatchQueue.main.async {
+                    self.articlesTV.reloadData()
+                }
+
+            } catch {
+                JKLog.log(message: "Failed to fetch articles")
+            }
+            
+        })
+        
+//        DispatchQueue.global(qos: .userInitiated).async {
+            task.resume()
+//        }
+        
+    }
+    
+    func checkIfFileExists(for title: String, publishedAt: String) -> Bool {
+        print("title=\(title)")
+        var isFound = false
+        JKLog.log(message: "\(Thread.current)") // MARK: global queue
+
+        if let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first { // go to document directory
+            let path = documentURL.appendingPathComponent("\(title)_\(publishedAt).png").path
+            
+            print("Searching for file: \(path)")
+
+            
+            if FileManager.default.fileExists(atPath: path) {
+                JKLog.log(message: "file found.")
+                isFound = true
+            } else {
+                JKLog.log(message: "file not found.")
+            }
+        }
+        return isFound
+    }
+    
+    func loadImageIfAvailable(for title: String, publishedAt: String ) -> UIImage? {
+        var loadedImage: UIImage?
+        
+        if checkIfFileExists(for: title, publishedAt: publishedAt) {
+            JKLog.log(message: "Loading image from doc dir...")
+//            DispatchQueue.global(qos: .userInitiated).async { // Need Completion handler
+                if let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("\(title)_\(publishedAt).png").path {
+                    
+                    let image = UIImage(contentsOfFile: path)
+                    loadedImage = image
+                }
+//            }
+        }
+        
+//        return UIImage(systemName: "rec") ?? UIImage()
+        return loadedImage
+    }
+    
+    func removeOldestFileIfCountExceeds() {
+        var oldestFile = ""
+        let delimiter = "_"
+        var publishedDate = ""
+        DispatchQueue.global(qos: .utility).async {
+            if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                let path = url.path
+                if let files = try? FileManager.default.contentsOfDirectory(atPath: path) {
+                    if files.count >= 10 {
+                        // REMOVE OLDEST FILE
+                        for file in files {
+                            publishedDate = file.description.components(separatedBy: delimiter).last ?? ""
+                            if publishedDate > oldestFile {
+                                oldestFile = file
+                            }
+                        }
+                        
+                        do {
+                            let targetFilePath = url.appendingPathComponent(oldestFile).path
+                            try FileManager.default.removeItem(atPath: targetFilePath)
+                            JKLog.log(message: "File removed.")
+                        } catch {
+                            JKLog.log(message: "Failed to remove file")
+                        }
+                    }
+                    
+                    
+                }
+            }
+        } // end of subthread
+    }
+    
+    
+//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+//        let destination = segue.destination as! LoadUrlVC
+//        if let targetUrlStr = targetUrlStr {
+//            destination.targetUrlStr = targetUrlStr
+//        }
+//    }
+    
+}
+
+extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        articles.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleCell", for: indexPath) as! ArticleCell
+        cell.sourceName.text = articles[indexPath.row].sourceName
+        cell.title.text = articles[indexPath.row].title
+        
+        // When saved, white space will be replaced by %
+        //              : by /
+        // MARK: Handling the special character cases for file name
+        let titleWithoutWhiteSpace = self.articles[indexPath.row].title.replacingOccurrences(of: " ", with: "")
+        let titleSavingFormat = titleWithoutWhiteSpace.replacingOccurrences(of: ":", with: "")
+        let publishedAtWithoutWhiteSpace = self.articles[indexPath.row].publishedAt.replacingOccurrences(of: " ", with: "")
+        let publishedAtSavingFormat = publishedAtWithoutWhiteSpace.replacingOccurrences(of: ":", with: "")
+        
+        // MARK: Check if image already exists
+        if let loadedImage = loadImageIfAvailable(for: titleSavingFormat, publishedAt: publishedAtSavingFormat) {
+            cell.imageView?.image = loadedImage
+            JKLog.log(message: "File exists. Loaded image from document directory")
+        } else {
+            JKLog.log(message: "Downloading image file...")
+            if let imageURL = URL(string: articles[indexPath.row].urlToImage) {
+                if let imageData = try? Data(contentsOf: imageURL) {
+                    let image = UIImage(data: imageData)
+                    cell.imageView?.image = image
+                    cell.imageView?.sizeToFit()
+                    cell.imageView?.clipsToBounds = true
+                    cell.imageView?.contentMode = .scaleAspectFill
+                } else {
+                    cell.imageView?.image = UIImage(systemName: "rec")
+                }
+            }
+            
+            
+            // MARK: Save first 10 images in document directory if needed
+            if indexPath.row < 10 {
+                JKLog.log(message: "Saving image file...")
+                // Check # of files in doc dir and remove file if needed
+                removeOldestFileIfCountExceeds()
+                
+                let fileName = "\(titleSavingFormat)_\(publishedAtSavingFormat)"
+                
+                // Save image in document directory
+                DispatchQueue.global(qos: .background).async {
+                    if let imageURL = URL(string: self.articles[indexPath.row].urlToImage) {
+                        do {
+                            let imageData = try Data(contentsOf: imageURL)
+                            if let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                                let outputFileURL = documentURL.appendingPathComponent("\(fileName).png")
+                             
+                                do {
+                                    try imageData.write(to: outputFileURL)
+                                    print("File saved: \(outputFileURL)")
+                                } catch {
+                                    JKLog.log(message: "Failed to save image: \(error)")
+                                }
+                            }
+                        } catch {
+                            JKLog.log(message: "Failed to download imageData: \(error)")
+                        }
+                    }
+                } // end of subthread */
+            } // end of saving images
+            
+        }
+        cell.author.text = articles[indexPath.row].author
+        cell.descriptionTextView.text = articles[indexPath.row].description
+        cell.publishDate.text = articles[indexPath.row].publishedAt
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        JKLog.log(message: "selected!")
+        
+        // Perform segue to load url in webview
+        targetUrlStr = articles[indexPath.row].url
+//        performSegue(withIdentifier: "LoadUrlVC", sender: self)
+        
+        // Present VC to load url in webview
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let destinationVC = storyboard.instantiateViewController(identifier: "LoadUrlVC") as! LoadUrlVC
+        destinationVC.targetUrlStr = targetUrlStr
+        present(destinationVC, animated: true, completion: nil)
+        
+        
+        
+        
+        /* MARK:- Saving image file once cell selected
+        // Check if file already exists
+        let titleWithoutWhiteSpace = self.articles[indexPath.row].title.replacingOccurrences(of: " ", with: "%")
+        
+        if !checkIfFileExists(for: titleWithoutWhiteSpace
+                             , publishedAt: articles[indexPath.row].publishedAt) {
+            JKLog.log(message: "Saving image file...")
+            
+            // Check # of files in doc dir and remove file if needed
+            removeOldestFileIfCountExceeds()
+            
+            let fileName = "\(titleWithoutWhiteSpace)_\(self.articles[indexPath.row].publishedAt)"
+            
+            
+            // Save image in document directory
+            DispatchQueue.global(qos: .utility).async {
+                if let imageURL = URL(string: self.articles[indexPath.row].urlToImage) {
+                    do {
+                        let imageData = try Data(contentsOf: imageURL)
+                        if let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                            let outputFileURL = documentURL.appendingPathComponent("\(fileName).png")
+                            
+                            do {
+                                try imageData.write(to: outputFileURL)
+                                print("File saved: \(outputFileURL)")
+                            } catch {
+                                JKLog.log(message: "Failed to save image: \(error)")
+                            }
+                        }
+                    } catch {
+                        JKLog.log(message: "Failed to download imageData: \(error)")
+                    }
+                }
+            } // end of subthread
+        }
+        */
+    }
+    
+//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//        return 281
+//    }
+    
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+    
 }

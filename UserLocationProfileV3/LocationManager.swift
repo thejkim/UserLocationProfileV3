@@ -8,8 +8,8 @@
 import UIKit
 import CoreLocation
 
-protocol ST_LocationManagerDelegate {
-    func locationDidUpdateWith(city: String, state: String, country: String)
+protocol LocationManagerDelegate {
+    func locationDidUpdateWith(city: String, state: String, country: String, countryCode: String)
 //    func locationDidChangePermission(to permission:ST_LocationManager.PermissionRequestResult)
 }
 
@@ -30,7 +30,7 @@ class ST_LocationManager: NSObject {
     
     private var locationManager: CLLocationManager?
     // https://stackoverflow.com/questions/27532897/find-delegate-in-a-swift-array-of-delegates
-    var delegate: ST_LocationManagerDelegate?
+    var delegate: LocationManagerDelegate?
     
     static let shared: ST_LocationManager = {
         let instance = ST_LocationManager()
@@ -46,7 +46,7 @@ class ST_LocationManager: NSObject {
             return
         }
 
-        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
         locationManager.delegate = self
     }
     
@@ -110,7 +110,8 @@ class ST_LocationManager: NSObject {
                     print(firstPlacemark.country)
                     print(firstPlacemark.locality) // state
                     print(firstPlacemark.subLocality) // city
-                    self.delegate?.locationDidUpdateWith(city: "\(firstPlacemark.subLocality ?? "N/A")", state: "\(firstPlacemark.locality ?? "N/A")", country: "\(firstPlacemark.country ?? "N/A")")
+                    print(firstPlacemark.isoCountryCode) // country code
+                    self.delegate?.locationDidUpdateWith(city: "\(firstPlacemark.subLocality ?? "N/A")", state: "\(firstPlacemark.locality ?? "N/A")", country: "\(firstPlacemark.country ?? "N/A")", countryCode: "\(firstPlacemark.isoCountryCode ?? "N/A")")
                 }
                 
 
@@ -173,7 +174,7 @@ extension ST_LocationManager {
     
 }
 
-//extension ST_LocationManagerDelegate {
+//extension LocationManagerDelegate {
 //    func locationDidUpdateWith(city: String, state: String, country: String) {
 //
 //    }

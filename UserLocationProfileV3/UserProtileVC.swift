@@ -21,6 +21,7 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
         
         imagePicker.delegate = self
         
+        profileImageBtn.contentMode = .scaleAspectFill
         profileImageBtn.layer.cornerRadius = profileImageBtn.frame.width/2
         profileImageBtn.layer.masksToBounds = true
         profileImageBtn.layer.borderWidth = 2
@@ -35,8 +36,7 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
         DispatchQueue.global(qos: .utility).async { // MARK: Ask video case
             JKLog.log(message: "\(Thread.current)") // MARK: global queue
 
-            print("Loading image in 3 seconds....")
-            sleep(3) // MARK: for test purpose
+            print("Loading image")
             if let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first { // go to document directory
                 let path = documentURL.path
                 do {
@@ -116,7 +116,7 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     }
     
     func openGallery() {
-        imagePicker.sourceType = .photoLibrary
+        imagePicker.sourceType = .photoLibrary // .camera //.savedPhotosAlbum(where taken photo added to) // .photoLibrary
         present(imagePicker, animated: true, completion: nil)
         
     }
@@ -130,7 +130,7 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        print("image picked: \(info[.originalImage])")
+        print("image picked: \(info[.originalImage])") // cropRect, editedImage, livePhoto, originalImage
         
         guard let chosenImage = info[.originalImage] as? UIImage else {
             return
@@ -141,13 +141,11 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
         let currentUsername = "test1" // TODO: properly get current username
         let imageIDString = "\(currentUsername)_\(Date())"
 
-        DispatchQueue.global(qos: .utility).async { // MARK: change it to sync
+        DispatchQueue.global(qos: .utility).async { //
             JKLog.log(message: "\(Thread.current)") // MARK: global queue
 
             // SAVE INTO COREDATA
-            print("Saving in 3 seconds....")
-            sleep(3) // MARK: for test purpose
-
+            print("Saving image...")
             if CoreDataManager.sharedManager.saveUserProfileImageID(forUser: currentUsername, withImage: imageIDString) { // error point
                 guard let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
                 

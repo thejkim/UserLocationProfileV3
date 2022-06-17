@@ -32,11 +32,61 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     
     func loadProfileImageIfAvailable() {
         let username = "test1" // TODO: properly get username
-        profileImageBtn.setTitle("Loading...", for: .normal)
-        DispatchQueue.global(qos: .utility).async { // MARK: Ask video case
+        
+        // Using Custom Concurrent Dispatch Queue
+        let dq = DispatchQueue(label: "test1", qos: .userInteractive, attributes: [.concurrent], autoreleaseFrequency: .workItem, target: nil)
+        dq.async {
             JKLog.log(message: "\(Thread.current)") // MARK: global queue
 
-            print("Loading image")
+            print("Loading image...")
+            if let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first { // go to document directory
+                
+                let path = documentURL.path
+                
+                do {
+                    let directoryContents = try FileManager.default.contentsOfDirectory(atPath: path)
+
+                    // OR use .hasPrefix("\(username)")
+                    if let targetFile = directoryContents.filter({ $0.contains("\(username)") }).first {
+                        DispatchQueue.main.async { // in case loading image is slow, inform user it's loading
+                            self.profileImageBtn.setTitle("Loading...", for: .normal) // TODO: implement progress bar or activity indicator instead for better user experience
+                        }
+                        
+                        print("target file found")
+                        let targetFileURL = documentURL.appendingPathComponent(targetFile)
+                        let image = UIImage(contentsOfFile: targetFileURL.path)
+                        DispatchQueue.main.async {
+                            JKLog.log(message: "\(Thread.current)") // MARK: Main queue in global queue
+                            
+                            self.profileImageBtn.setBackgroundImage(image, for: .normal)
+                            self.profileImageBtn.setTitle("", for: .normal)
+                            print("image loaded!")
+
+
+                        }
+                        self.currentProfileImageID = targetFile
+                    } else { // not found
+                        DispatchQueue.main.async {
+                            self.profileImageBtn.setTitle("", for: .normal)
+                        }
+                    }
+                    
+                } catch {
+                    
+                }
+
+            }
+//            DispatchQueue.main.async {
+//                self.profileImageBtn.setTitle("", for: .normal)
+//            }
+
+        } // end of subthread
+        
+        /* // Using Global Dispatch Queue
+        DispatchQueue.global(qos: .userInteractive).async {
+            JKLog.log(message: "\(Thread.current)") // MARK: global queue
+
+            print("Loading image...")
             if let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first { // go to document directory
                 let path = documentURL.path
                 do {
@@ -52,6 +102,8 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
                             
                             self.profileImageBtn.setBackgroundImage(image, for: .normal)
                             self.profileImageBtn.setTitle("", for: .normal)
+                            print("image loaded!")
+
 
                         }
                         self.currentProfileImageID = targetFile
@@ -62,13 +114,12 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
                 }
 
             }
-            print("image loaded!")
 //            DispatchQueue.main.async {
 //                self.profileImageBtn.setTitle("", for: .normal)
 //            }
 
         } // end of subthread
-
+        */
         
     }
     
@@ -89,9 +140,11 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
             self.profileImageBtn.setBackgroundImage(UIImage(systemName: "person.fill.questionmark"), for: .normal)
 
             // Remove from Core Data, document directory
-            CoreDataManager.sharedManager.removeUserProfileImageID(fromUser: currentUsername)
-            guard let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
-            self.removeFileFrom(url: documentURL, forUser: currentUsername)
+            DispatchQueue.global(qos: .background).async {
+                CoreDataManager.sharedManager.removeUserProfileImageID(fromUser: currentUsername)
+                guard let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+                self.removeFileFrom(url: documentURL, forUser: currentUsername)
+            }
 
             
         } )
@@ -150,7 +203,6 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
                 guard let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
                 
                 // REMOVE OLD IMAGE FROM DOCUMENT DIRECTORY
-                // MARK: Ask why it's executed in main thread
                 self.removeFileFrom(url: documentURL, forUser: currentUsername)
                 
                 // SAVE SELECTED IMAGE INTO DOCUMENT DIRECTORY

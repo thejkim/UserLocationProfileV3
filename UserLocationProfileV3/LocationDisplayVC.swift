@@ -20,6 +20,8 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
     var apiKey: String?
     var targetUrlStr: String?
     
+    var pendingIndexPath: [IndexPath] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -40,12 +42,12 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
             present(destinationVC, animated: true, completion: nil)
         case .systemNotAllowed:
             print("location service disabled")
-            var alert = UIAlertController(title: "Location Service Disabled", message: "Location service is disabled. Please go to Settings, enabled the location service to allow the app access to your current location.", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Location Service Disabled", message: "Location service is disabled. Please go to Settings, enabled the location service to allow the app access to your current location.", preferredStyle: .alert)
             let ok = UIAlertAction(title: "OK", style: .default, handler: nil)
             alert.addAction(ok)
             self.present(alert, animated: true, completion: nil)
         case .appNotAllowed:
-            var alert = UIAlertController(title: "App Not Authorized", message: "We are not authorized to access your location information. Please go to App Settings, enabled the location service of the app to give access to your current location.", preferredStyle: .alert)
+            let alert = UIAlertController(title: "App Not Authorized", message: "We are not authorized to access your location information. Please go to App Settings, enabled the location service of the app to give access to your current location.", preferredStyle: .alert)
             let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
             let openSettings = UIAlertAction(title: "Open Settings", style: .default, handler: {(action ) in
                 if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -157,16 +159,14 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
             
         })
         
-//        DispatchQueue.global(qos: .userInitiated).async {
-            task.resume()
-//        }
+        task.resume()
         
     }
     
     func checkIfFileExists(for title: String, publishedAt: String) -> Bool {
         print("title=\(title)")
         var isFound = false
-        JKLog.log(message: "\(Thread.current)") // MARK: global queue
+        JKLog.log(message: "\(Thread.current)")
 
         if let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first { // go to document directory
             let path = documentURL.appendingPathComponent("\(title)_\(publishedAt).png").path
@@ -184,28 +184,86 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
         return isFound
     }
     
-    func loadImageIfAvailable(for title: String, publishedAt: String ) -> UIImage? {
+    func loadImageIfAvailable(for title: String, publishedAt: String) -> UIImage? {
         var loadedImage: UIImage?
-        
+
         if checkIfFileExists(for: title, publishedAt: publishedAt) {
             JKLog.log(message: "Loading image from doc dir...")
-//            DispatchQueue.global(qos: .userInitiated).async { // Need Completion handler
+
+            if let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("\(title)_\(publishedAt).png").path {
+                
+                let image = UIImage(contentsOfFile: path)
+                loadedImage = image
+            }
+                
+        }
+        return loadedImage
+    }
+    
+    func loadImage(for title: String, publishedAt: String, at indexPath: IndexPath) {
+        var loadedImage: UIImage?
+        JKLog.log(message: "Loading image from doc dir...")
+
+        ///* DispatchQueue.global.async
+//        if checkIfFileExists(for: title, publishedAt: publishedAt) {
+            DispatchQueue.global(qos: .userInitiated).async { // Need Completion handler
+        
                 if let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("\(title)_\(publishedAt).png").path {
                     
                     let image = UIImage(contentsOfFile: path)
                     loadedImage = image
                 }
-//            }
+                
+                DispatchQueue.main.async {
+                    if let cellImageViewAt = self.articlesTV.cellForRow(at: indexPath)?.imageView {
+                        cellImageViewAt.image = loadedImage // assign image to imageView for the given cell
+//                        self.articlesTV.reloadRows(at: [indexPath], with: .automatic) // reload the TV for the given indexPath
+                        JKLog.log(message: "Given cell is updated with loaded image")
+                    }
+                }
+            }
+//        }
+        //*/ // end of global dispatch queue
+        
+        
+        /* Operation Queue
+        let opQueue = OperationQueue()
+        
+        let blockOperation = BlockOperation {
+            if let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("\(title)_\(publishedAt).png").path {
+                
+                let image = UIImage(contentsOfFile: path)
+                loadedImage = image
+                JKLog.log(message: "Saved image loaded at \(indexPath)")
+                self.pendingIndexPath.append(indexPath)
+            }
         }
         
-//        return UIImage(systemName: "rec") ?? UIImage()
-        return loadedImage
+        opQueue.addOperation(blockOperation)
+        
+        blockOperation.completionBlock = {
+            // UPDATE TABLEVIEW ROW AT
+            DispatchQueue.main.async {
+                
+                if let cellImageViewAt = self.articlesTV.cellForRow(at: indexPath)?.imageView {
+                    cellImageViewAt.image = loadedImage // assign image to imageView for the given cell
+                    self.articlesTV.reloadRows(at: [indexPath], with: .automatic) // reload the TV for the given indexPath
+                    JKLog.log(message: "Given cell is updated with loaded image")
+                    self.pendingIndexPath.remove(at: indexPath.row)
+                }
+            }
+        }
+        
+         */ // end of Operation Queue
+        
+        
     }
     
     func removeOldestFileIfCountExceeds() {
         var oldestFile = ""
         let delimiter = "_"
         var publishedDate = ""
+        let username = "test1" // TODO: properly get username
         DispatchQueue.global(qos: .utility).async {
             if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
                 let path = url.path
@@ -213,9 +271,11 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
                     if files.count >= 10 {
                         // REMOVE OLDEST FILE
                         for file in files {
-                            publishedDate = file.description.components(separatedBy: delimiter).last ?? ""
-                            if publishedDate > oldestFile {
-                                oldestFile = file
+                            if !files.description.hasPrefix("\(username)_") { // prevent from removing user profile image
+                                publishedDate = file.description.components(separatedBy: delimiter).last ?? ""
+                                if publishedDate > oldestFile{
+                                    oldestFile = file
+                                }
                             }
                         }
                         
@@ -263,6 +323,12 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
         let publishedAtSavingFormat = publishedAtWithoutWhiteSpace.replacingOccurrences(of: ":", with: "")
         
         // MARK: Check if image already exists
+        /* Case: if file exists, load image from document directory asynchronously, update specific row
+        if checkIfFileExists(for: titleSavingFormat, publishedAt: publishedAtSavingFormat) {
+            // Load image file from document directory, update UI once loaded
+//            loadImage(for: titleSavingFormat, publishedAt: publishedAtSavingFormat, at: indexPath)
+        */
+        // Case: Load image if exists from document directory in main queue serially
         if let loadedImage = loadImageIfAvailable(for: titleSavingFormat, publishedAt: publishedAtSavingFormat) {
             cell.imageView?.image = loadedImage
             JKLog.log(message: "File exists. Loaded image from document directory")

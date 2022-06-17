@@ -69,5 +69,10 @@
 - Uploading up to 10 collected images in document directory updated
     - once tapped to first 10 articles while loading articles
 
+[Jun 17]
+- Loading saved images fixed
+- Found bug: Loading user profile image - fixed
+- "Loading" message for user profile apprears once it starts loading, not beforehand
+
 [TODO]
 - dismiss LocationServiceAuthorizationVC once user made decision on location service permission

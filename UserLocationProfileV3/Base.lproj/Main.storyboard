@@ -325,7 +325,13 @@
                             <constraint firstItem="rgx-uo-Xhj" firstAttribute="leading" secondItem="ys4-vv-atJ" secondAttribute="leading" id="zRj-4x-6Xb"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Location" id="lOF-jo-oME"/>
+                    <navigationItem key="navigationItem" title="Location" id="lOF-jo-oME">
+                        <barButtonItem key="rightBarButtonItem" title="Refresh" id="ENW-kK-mMI">
+                            <connections>
+                                <action selector="refreshBarBtnTouched:" destination="xgu-Og-g5b" id="LsI-7H-Tbz"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="articlesTV" destination="rgx-uo-Xhj" id="a20-GX-d3x"/>
                         <outlet property="cityNameLabel" destination="tDi-lD-4Wd" id="d7y-ET-YYv"/>

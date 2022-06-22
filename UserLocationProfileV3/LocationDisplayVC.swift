@@ -22,6 +22,9 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
     
     var pendingIndexPath: [IndexPath] = []
     
+    // MARK: NSCache for image
+    var cacheInstance = NSCache<NSString, NSData>()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -64,6 +67,8 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
         
         locationManager.delegate = self // make new instance of delegate, not changing/assigning to old one
         
+        //MARK: NSCache for image
+        cacheInstance.name = "imageCache"
 
     }
     
@@ -75,6 +80,9 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
         countryNameLabel.text = country
         
         fetchArticlesFor(currentCountry: countryCode.lowercased())
+        
+    }
+    @IBAction func refreshBarBtnTouched(_ sender: UIBarButtonItem) {
         
     }
     
@@ -140,6 +148,19 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
                     newArticleInstance.title = newArticle["title"] as? String ?? "N/A"
                     newArticleInstance.url = newArticle["url"] as? String ?? "N/A"
                     newArticleInstance.urlToImage = newArticle["urlToImage"] as? String ?? "N/A"
+                    
+                    // MARK: NSCache for image
+                    // if cachedImageData found, skip to cache imageData
+                    if let cachedImageData = self.cacheInstance.object(forKey: newArticle["urlToImage"] as? NSString ?? "N/A") {
+                        JKLog.log(message: "Cached image found")
+                    } else { // if cachedImageData not found, cache imageData
+                        if let imageURL = URL(string: newArticle["urlToImage"] as? String ?? "N/A") {
+                            if let imageData = try? Data(contentsOf: imageURL) {
+                                JKLog.log(message: "Caching imageData...")
+                                self.cacheInstance.setObject(imageData as NSData, forKey: imageURL.absoluteString as NSString)
+                            }
+                        }
+                    }
                     
                     // append
                     self.articles.append(newArticleInstance)
@@ -322,61 +343,70 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
         let publishedAtWithoutWhiteSpace = self.articles[indexPath.row].publishedAt.replacingOccurrences(of: " ", with: "")
         let publishedAtSavingFormat = publishedAtWithoutWhiteSpace.replacingOccurrences(of: ":", with: "")
         
-        // MARK: Check if image already exists
-        /* Case: if file exists, load image from document directory asynchronously, update specific row
-        if checkIfFileExists(for: titleSavingFormat, publishedAt: publishedAtSavingFormat) {
-            // Load image file from document directory, update UI once loaded
-//            loadImage(for: titleSavingFormat, publishedAt: publishedAtSavingFormat, at: indexPath)
-        */
-        // Case: Load image if exists from document directory in main queue serially
-        if let loadedImage = loadImageIfAvailable(for: titleSavingFormat, publishedAt: publishedAtSavingFormat) {
-            cell.imageView?.image = loadedImage
-            JKLog.log(message: "File exists. Loaded image from document directory")
+        
+        // MARK: NSCache for image
+        // Check if imageData is in cache
+        if let cachedImageData = cacheInstance.object(forKey: articles[indexPath.row].urlToImage as NSString) {
+            JKLog.log(message: "Using cached image!")
+            let image = UIImage(data: cachedImageData as Data)
+            cell.imageView?.image = image
         } else {
-            JKLog.log(message: "Downloading image file...")
-            if let imageURL = URL(string: articles[indexPath.row].urlToImage) {
-                if let imageData = try? Data(contentsOf: imageURL) {
-                    let image = UIImage(data: imageData)
-                    cell.imageView?.image = image
-                    cell.imageView?.sizeToFit()
-                    cell.imageView?.clipsToBounds = true
-                    cell.imageView?.contentMode = .scaleAspectFill
-                } else {
-                    cell.imageView?.image = UIImage(systemName: "rec")
-                }
-            }
-            
-            
-            // MARK: Save first 10 images in document directory if needed
-            if indexPath.row < 10 {
-                JKLog.log(message: "Saving image file...")
-                // Check # of files in doc dir and remove file if needed
-                removeOldestFileIfCountExceeds()
-                
-                let fileName = "\(titleSavingFormat)_\(publishedAtSavingFormat)"
-                
-                // Save image in document directory
-                DispatchQueue.global(qos: .background).async {
-                    if let imageURL = URL(string: self.articles[indexPath.row].urlToImage) {
-                        do {
-                            let imageData = try Data(contentsOf: imageURL)
-                            if let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                                let outputFileURL = documentURL.appendingPathComponent("\(fileName).png")
-                             
-                                do {
-                                    try imageData.write(to: outputFileURL)
-                                    print("File saved: \(outputFileURL)")
-                                } catch {
-                                    JKLog.log(message: "Failed to save image: \(error)")
-                                }
-                            }
-                        } catch {
-                            JKLog.log(message: "Failed to download imageData: \(error)")
-                        }
+            // MARK: Check if image already exists in document directory
+            /* Case: if file exists, load image from document directory asynchronously, update specific row
+            if checkIfFileExists(for: titleSavingFormat, publishedAt: publishedAtSavingFormat) {
+                // Load image file from document directory, update UI once loaded
+    //            loadImage(for: titleSavingFormat, publishedAt: publishedAtSavingFormat, at: indexPath)
+            */
+            // Case: Load image if exists from document directory in main queue serially
+            if let loadedImage = loadImageIfAvailable(for: titleSavingFormat, publishedAt: publishedAtSavingFormat) {
+                cell.imageView?.image = loadedImage
+                JKLog.log(message: "File exists. Loaded image from document directory")
+            } else {
+                JKLog.log(message: "Downloading image file...")
+                if let imageURL = URL(string: articles[indexPath.row].urlToImage) {
+                    if let imageData = try? Data(contentsOf: imageURL) {
+                        let image = UIImage(data: imageData)
+                        cell.imageView?.image = image
+                        cell.imageView?.sizeToFit()
+                        cell.imageView?.clipsToBounds = true
+                        cell.imageView?.contentMode = .scaleAspectFill
+                    } else {
+                        cell.imageView?.image = UIImage(systemName: "rec")
                     }
-                } // end of subthread */
-            } // end of saving images
-            
+                }
+                
+                
+                // MARK: Save first 10 images in document directory if needed
+                if indexPath.row < 10 {
+                    JKLog.log(message: "Saving image file...")
+                    // Check # of files in doc dir and remove file if needed
+                    removeOldestFileIfCountExceeds()
+                    
+                    let fileName = "\(titleSavingFormat)_\(publishedAtSavingFormat)"
+                    
+                    // Save image in document directory
+                    DispatchQueue.global(qos: .background).async {
+                        if let imageURL = URL(string: self.articles[indexPath.row].urlToImage) {
+                            do {
+                                let imageData = try Data(contentsOf: imageURL)
+                                if let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                                    let outputFileURL = documentURL.appendingPathComponent("\(fileName).png")
+                                 
+                                    do {
+                                        try imageData.write(to: outputFileURL)
+                                        print("File saved: \(outputFileURL)")
+                                    } catch {
+                                        JKLog.log(message: "Failed to save image: \(error)")
+                                    }
+                                }
+                            } catch {
+                                JKLog.log(message: "Failed to download imageData: \(error)")
+                            }
+                        }
+                    } // end of subthread */
+                } // end of saving images
+                
+            }
         }
         cell.author.text = articles[indexPath.row].author
         cell.descriptionTextView.text = articles[indexPath.row].description

@@ -9,19 +9,9 @@ import UIKit
 
 class ArticleCell: UITableViewCell {
     
-    @IBOutlet weak var sourceName: UILabel!
-    @IBOutlet weak var articleImage: UIImageView!
-    @IBOutlet weak var title: UILabel!
-    @IBOutlet weak var author: UILabel!
-    @IBOutlet weak var descriptionTextView: UITextView!
-    @IBOutlet weak var publishDate: UILabel!
-    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        articleImage.clipsToBounds = true
-        articleImage.contentMode = .scaleAspectFill
-        articleImage.sizeToFit()
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

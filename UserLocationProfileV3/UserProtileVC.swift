@@ -12,6 +12,7 @@ import AVFoundation
 class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     @IBOutlet weak var profileImageBtn: UIButton!
+    @IBOutlet weak var profileImageLoadingActivityIndicator: UIActivityIndicatorView!
     
     var imagePicker = UIImagePickerController()
     var currentProfileImageID: String?
@@ -20,11 +21,13 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
         super.viewDidLoad()
         
         imagePicker.delegate = self
-        
+                
         profileImageBtn.contentMode = .scaleAspectFill
         profileImageBtn.layer.cornerRadius = profileImageBtn.frame.width/2
         profileImageBtn.layer.masksToBounds = true
         profileImageBtn.layer.borderWidth = 2
+        
+//        profileImageLoadingActivityIndicator.hidesWhenStopped = true
         
         loadProfileImageIfAvailable()
 
@@ -49,15 +52,21 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
                     // OR use .hasPrefix("\(username)")
                     if let targetFile = directoryContents.filter({ $0.contains("\(username)") }).first {
                         DispatchQueue.main.async { // in case loading image is slow, inform user it's loading
-                            self.profileImageBtn.setTitle("Loading...", for: .normal) // TODO: implement progress bar or activity indicator instead for better user experience
+//                            self.profileImageBtn.setTitle("Loading...", for: .normal) // TODO: implement progress bar or activity indicator instead for better user experience
+                            self.profileImageLoadingActivityIndicator.startAnimating()
+                            self.profileImageLoadingActivityIndicator.isHidden = false
+
                         }
                         
                         print("target file found")
                         let targetFileURL = documentURL.appendingPathComponent(targetFile)
                         let image = UIImage(contentsOfFile: targetFileURL.path)
                         DispatchQueue.main.async {
+                            sleep(5)
+
                             JKLog.log(message: "\(Thread.current)") // MARK: Main queue in global queue
-                            
+                            self.profileImageLoadingActivityIndicator.stopAnimating()
+                            self.profileImageLoadingActivityIndicator.isHidden = true
                             self.profileImageBtn.setBackgroundImage(image, for: .normal)
                             self.profileImageBtn.setTitle("", for: .normal)
                             print("image loaded!")
@@ -169,7 +178,7 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     }
     
     func openGallery() {
-        imagePicker.sourceType = .photoLibrary // .camera //.savedPhotosAlbum(where taken photo added to) // .photoLibrary
+        imagePicker.sourceType = .photoLibrary // .camera //.savedPhotosAlbum(where taken photo added to)
         present(imagePicker, animated: true, completion: nil)
         
     }
@@ -183,6 +192,7 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        print("info type = \(type(of: info))")
         print("image picked: \(info[.originalImage])") // cropRect, editedImage, livePhoto, originalImage
         
         guard let chosenImage = info[.originalImage] as? UIImage else {

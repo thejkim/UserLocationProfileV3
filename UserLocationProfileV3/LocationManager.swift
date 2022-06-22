@@ -13,7 +13,7 @@ protocol LocationManagerDelegate {
 //    func locationDidChangePermission(to permission:ST_LocationManager.PermissionRequestResult)
 }
 
-class ST_LocationManager: NSObject {
+class ST_LocationManager : NSObject {
     /*
      class var sharedInstance: LocationService {
              struct Static {
@@ -36,6 +36,8 @@ class ST_LocationManager: NSObject {
         let instance = ST_LocationManager()
         return instance
     }()
+    
+    
     
     override init() {
         super.init()
@@ -94,6 +96,19 @@ class ST_LocationManager: NSObject {
 
     }
     
+    func getAccuracyAuthorization() -> CLAccuracyAuthorization {
+        if let locationManager = locationManager {
+            switch locationManager.accuracyAuthorization {
+            case .fullAccuracy:
+                print("full")
+            case .reducedAccuracy:
+                print("reduced")
+            }
+            return locationManager.accuracyAuthorization
+        }
+        return .reducedAccuracy
+    }
+    
     
     func getAddress() {
         JKLog.log(message: "\(Thread.current)")
@@ -110,6 +125,8 @@ class ST_LocationManager: NSObject {
                     print(firstPlacemark.country)
                     print(firstPlacemark.locality) // state
                     print(firstPlacemark.subLocality) // city
+                    print(firstPlacemark.administrativeArea)
+                    print(firstPlacemark.subAdministrativeArea) // county
                     print(firstPlacemark.isoCountryCode) // country code
                     self.delegate?.locationDidUpdateWith(city: "\(firstPlacemark.subLocality ?? "N/A")", state: "\(firstPlacemark.locality ?? "N/A")", country: "\(firstPlacemark.country ?? "N/A")", countryCode: "\(firstPlacemark.isoCountryCode ?? "N/A")")
                 }
@@ -125,6 +142,7 @@ class ST_LocationManager: NSObject {
 }
 
 extension ST_LocationManager: CLLocationManagerDelegate {
+
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         print("\(#function)")
         guard let locationManager = locationManager else { return }
@@ -147,11 +165,12 @@ extension ST_LocationManager: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        JKLog.log(message: ":: \(getAccuracyAuthorization())")
         if let lastLocation = locations.last {
             JKLog.log(message: "long: \(lastLocation.coordinate.longitude) | lat: \(lastLocation.coordinate.latitude)")
         }
         // convert lon,lat to address
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .userInteractive).async {
             JKLog.log(message: "\(Thread.current)") // MARK: global queue
             self.getAddress()
         }

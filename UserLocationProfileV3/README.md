@@ -72,7 +72,8 @@
 [Jun 17]
 - Loading saved images fixed
 - Found bug: Loading user profile image - fixed
-- "Loading" message for user profile apprears once it starts loading, not beforehand
+- ~~"Loading" message for user profile~~ apprears once it starts loading, not beforehand
+- Displaying activity indicator instead of displaying "loading" message while loading
 
 [TODO]
 - dismiss LocationServiceAuthorizationVC once user made decision on location service permission

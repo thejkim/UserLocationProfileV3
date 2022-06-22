@@ -423,20 +423,31 @@
                                     <action selector="btnTouched:" destination="qHg-K8-n0q" eventType="touchUpInside" id="NcV-ug-PnU"/>
                                 </connections>
                             </button>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="zUx-xg-agk">
+                                <rect key="frame" x="198" y="192" width="18" height="20"/>
+                                <color key="tintColor" systemColor="systemGreenColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="zUx-xg-agk" secondAttribute="height" multiplier="12:13" id="nlJ-lw-e9i"/>
+                                </constraints>
+                                <color key="color" systemColor="systemGreenColor"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="0Ad-Mq-nie"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="zUx-xg-agk" firstAttribute="centerX" secondItem="Fyr-it-4B9" secondAttribute="centerX" id="VRa-tN-sdP"/>
                             <constraint firstItem="Fyr-it-4B9" firstAttribute="width" secondItem="Jgs-Ul-7it" secondAttribute="width" multiplier="0.434783" id="dt3-jk-eoI"/>
                             <constraint firstItem="rSY-81-oht" firstAttribute="centerX" secondItem="0Ad-Mq-nie" secondAttribute="centerX" id="eTx-hb-664"/>
                             <constraint firstItem="Fyr-it-4B9" firstAttribute="centerX" secondItem="0Ad-Mq-nie" secondAttribute="centerX" id="gbf-YK-Mfb"/>
                             <constraint firstItem="rSY-81-oht" firstAttribute="top" secondItem="Fyr-it-4B9" secondAttribute="bottom" constant="100" id="tNF-GE-0k8"/>
                             <constraint firstItem="Fyr-it-4B9" firstAttribute="top" secondItem="0Ad-Mq-nie" secondAttribute="top" constant="24" id="tw3-j3-wlZ"/>
+                            <constraint firstItem="zUx-xg-agk" firstAttribute="centerY" secondItem="Fyr-it-4B9" secondAttribute="centerY" id="wJd-Bm-z8g"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Profile" id="0ky-86-anT"/>
                     <connections>
                         <outlet property="profileImageBtn" destination="Fyr-it-4B9" id="Rs2-wK-3C8"/>
+                        <outlet property="profileImageLoadingActivityIndicator" destination="zUx-xg-agk" id="uRb-bz-Epg"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0ud-xg-IDj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

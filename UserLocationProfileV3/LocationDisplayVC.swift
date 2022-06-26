@@ -149,7 +149,7 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
                     newArticleInstance.url = newArticle["url"] as? String ?? "N/A"
                     newArticleInstance.urlToImage = newArticle["urlToImage"] as? String ?? "N/A"
                     
-                    // MARK: NSCache for image
+                    /*// MARK: NSCache for image
                     // if cachedImageData found, skip to cache imageData
                     if let cachedImageData = self.cacheInstance.object(forKey: newArticle["urlToImage"] as? NSString ?? "N/A") {
                         JKLog.log(message: "Cached image found")
@@ -160,14 +160,13 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate {
                                 self.cacheInstance.setObject(imageData as NSData, forKey: imageURL.absoluteString as NSString)
                             }
                         }
-                    }
+                    }*/ // end of caching imageData
                     
                     // append
                     self.articles.append(newArticleInstance)
                     
-//                    DispatchQueue.main.async { // if getting one article by one
-//                        self.articlesTV.reloadData()
-//                    }
+                    // if getting one article by one, reloadRow
+
                     
                 }
                 DispatchQueue.main.async {
@@ -334,7 +333,6 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleCell", for: indexPath) as! ArticleCell
         cell.sourceName.text = articles[indexPath.row].sourceName
         cell.title.text = articles[indexPath.row].title
-        
         // When saved, white space will be replaced by %
         //              : by /
         // MARK: Handling the special character cases for file name
@@ -344,13 +342,19 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
         let publishedAtSavingFormat = publishedAtWithoutWhiteSpace.replacingOccurrences(of: ":", with: "")
         
         
-        // MARK: NSCache for image
+        /*// MARK: NSCache for image
         // Check if imageData is in cache
         if let cachedImageData = cacheInstance.object(forKey: articles[indexPath.row].urlToImage as NSString) {
             JKLog.log(message: "Using cached image!")
             let image = UIImage(data: cachedImageData as Data)
+//            if let imageView = cell.imageView {
+//                JKLog.log(message: "::: imageView unwrapped")
+//                imageView.image = image
+//            } else {
+//                JKLog.log(message: "::: imageView failed to unwrap")
+//            }
             cell.imageView?.image = image
-        } else {
+        } else { */
             // MARK: Check if image already exists in document directory
             /* Case: if file exists, load image from document directory asynchronously, update specific row
             if checkIfFileExists(for: titleSavingFormat, publishedAt: publishedAtSavingFormat) {
@@ -360,6 +364,7 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
             // Case: Load image if exists from document directory in main queue serially
             if let loadedImage = loadImageIfAvailable(for: titleSavingFormat, publishedAt: publishedAtSavingFormat) {
                 cell.imageView?.image = loadedImage
+                cell.imageView?.clipsToBounds = true
                 JKLog.log(message: "File exists. Loaded image from document directory")
             } else {
                 JKLog.log(message: "Downloading image file...")
@@ -367,9 +372,9 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
                     if let imageData = try? Data(contentsOf: imageURL) {
                         let image = UIImage(data: imageData)
                         cell.imageView?.image = image
-                        cell.imageView?.sizeToFit()
+//                        cell.imageView?.sizeToFit()
                         cell.imageView?.clipsToBounds = true
-                        cell.imageView?.contentMode = .scaleAspectFill
+//                        cell.imageView?.contentMode = .scaleAspectFill
                     } else {
                         cell.imageView?.image = UIImage(systemName: "rec")
                     }
@@ -407,7 +412,7 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
                 } // end of saving images
                 
             }
-        }
+        /* } */ // NSCache else block end
         cell.author.text = articles[indexPath.row].author
         cell.descriptionTextView.text = articles[indexPath.row].description
         cell.publishDate.text = articles[indexPath.row].publishedAt

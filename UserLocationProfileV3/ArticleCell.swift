@@ -20,8 +20,8 @@ class ArticleCell: UITableViewCell {
         super.awakeFromNib()
         // Initialization code
         articleImage.clipsToBounds = true
-        articleImage.contentMode = .scaleAspectFill
-        articleImage.sizeToFit()
+//        articleImage.contentMode = .scaleAspectFill
+//        articleImage.sizeToFit()
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

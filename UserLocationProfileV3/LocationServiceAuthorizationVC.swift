@@ -16,7 +16,7 @@ class LocationServiceAuthorizationVC: UIViewController {
 //    }
     
     
-    let locationManager = ST_LocationManager.shared
+    let locationManager = LocationManager.shared
     
     @IBOutlet weak var informativeMessageLabel: UILabel!
     override func viewDidLoad() {

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7412D0462869058B0028AAD5 /* NetworkingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7412D0452869058B0028AAD5 /* NetworkingManager.swift */; };
+		7412D04828690D690028AAD5 /* FileDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7412D04728690D690028AAD5 /* FileDataManager.swift */; };
 		743599782855BF8F008800CE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743599772855BF8F008800CE /* AppDelegate.swift */; };
 		7435997A2855BF8F008800CE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743599792855BF8F008800CE /* SceneDelegate.swift */; };
 		743599822855BF8F008800CE /* UserLocationProfileV3.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 743599802855BF8F008800CE /* UserLocationProfileV3.xcdatamodeld */; };
@@ -32,6 +34,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7412D0452869058B0028AAD5 /* NetworkingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingManager.swift; sourceTree = "<group>"; };
+		7412D04728690D690028AAD5 /* FileDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDataManager.swift; sourceTree = "<group>"; };
 		743599742855BF8F008800CE /* UserLocationProfileV3.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UserLocationProfileV3.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		743599772855BF8F008800CE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		743599792855BF8F008800CE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -103,6 +107,8 @@
 				743599912855BFF9008800CE /* JKLog.swift */,
 				745AEF2C285B383700F658DE /* Reachability.swift */,
 				743599962855BFFA008800CE /* LocationDisplayVC.swift */,
+				7412D04728690D690028AAD5 /* FileDataManager.swift */,
+				7412D0452869058B0028AAD5 /* NetworkingManager.swift */,
 				745AEF24285A015600F658DE /* Constants.swift */,
 				745AEF1E2859EECC00F658DE /* Article.swift */,
 				743599942855BFFA008800CE /* LocationServiceAuthorizationVC.swift */,
@@ -196,10 +202,12 @@
 				7435999A2855BFFA008800CE /* LocationServiceAuthorizationVC.swift in Sources */,
 				745AEF25285A015600F658DE /* Constants.swift in Sources */,
 				7435999C2855BFFA008800CE /* LocationDisplayVC.swift in Sources */,
+				7412D0462869058B0028AAD5 /* NetworkingManager.swift in Sources */,
 				743599782855BF8F008800CE /* AppDelegate.swift in Sources */,
 				7435999B2855BFFA008800CE /* UserProtileVC.swift in Sources */,
 				743599972855BFFA008800CE /* JKLog.swift in Sources */,
 				7435997A2855BF8F008800CE /* SceneDelegate.swift in Sources */,
+				7412D04828690D690028AAD5 /* FileDataManager.swift in Sources */,
 				745AEF2D285B383700F658DE /* Reachability.swift in Sources */,
 				7435999E285674F7008800CE /* CoreDataManager.swift in Sources */,
 				743599A328567F71008800CE /* UserProfile+CoreDataClass.swift in Sources */,

@@ -5,15 +5,13 @@
 //  Created by Joeun Kim on 6/11/22.
 //
 
-import UIKit
 import CoreLocation
 
-protocol LocationManagerDelegate {
+protocol LocationManagerDelegate: AnyObject { // AnyObject: to ensure delegate is weak reference
     func locationDidUpdateWith(city: String, state: String, country: String, countryCode: String)
-//    func locationDidChangePermission(to permission:ST_LocationManager.PermissionRequestResult)
 }
 
-class ST_LocationManager : NSObject {
+class LocationManager : NSObject {
     /*
      class var sharedInstance: LocationService {
              struct Static {
@@ -30,14 +28,12 @@ class ST_LocationManager : NSObject {
     
     private var locationManager: CLLocationManager?
     // https://stackoverflow.com/questions/27532897/find-delegate-in-a-swift-array-of-delegates
-    var delegate: LocationManagerDelegate?
+    weak var delegate: LocationManagerDelegate?
     
-    static let shared: ST_LocationManager = {
-        let instance = ST_LocationManager()
+    static let shared: LocationManager = {
+        let instance = LocationManager()
         return instance
     }()
-    
-    
     
     override init() {
         super.init()
@@ -128,6 +124,8 @@ class ST_LocationManager : NSObject {
                     print(firstPlacemark.administrativeArea)
                     print(firstPlacemark.subAdministrativeArea) // county
                     print(firstPlacemark.isoCountryCode) // country code
+                    
+                    // M -> C : Notify location update to delegator
                     self.delegate?.locationDidUpdateWith(city: "\(firstPlacemark.subLocality ?? "N/A")", state: "\(firstPlacemark.locality ?? "N/A")", country: "\(firstPlacemark.country ?? "N/A")", countryCode: "\(firstPlacemark.isoCountryCode ?? "N/A")")
                 }
                 
@@ -141,7 +139,7 @@ class ST_LocationManager : NSObject {
 
 }
 
-extension ST_LocationManager: CLLocationManagerDelegate {
+extension LocationManager: CLLocationManagerDelegate {
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         print("\(#function)")
@@ -151,21 +149,10 @@ extension ST_LocationManager: CLLocationManagerDelegate {
             locationManager.startUpdatingLocation()
         }
         
-//        switch locationManager.authorizationStatus {
-//        case .authorizedAlways, .authorizedWhenInUse:
-//            delegate?.locationDidChangePermission(to: .granted)
-//        case .denied, .restricted:
-//            delegate?.locationDidChangePermission(to: .appNotAllowed)
-//        case .notDetermined:
-//            delegate?.locationDidChangePermission(to: .notDetermined)
-//        default:
-//            delegate?.locationDidChangePermission(to: .systemNotAllowed)
-//        }
-        
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        JKLog.log(message: ":: \(getAccuracyAuthorization())")
+        JKLog.log(message: "\(getAccuracyAuthorization())")
         if let lastLocation = locations.last {
             JKLog.log(message: "long: \(lastLocation.coordinate.longitude) | lat: \(lastLocation.coordinate.latitude)")
         }
@@ -186,18 +173,9 @@ extension ST_LocationManager: CLLocationManagerDelegate {
     
 }
 
-extension ST_LocationManager {
+extension LocationManager {
     enum PermissionRequestResult {
         case granted, notDetermined, appNotAllowed, systemNotAllowed
     }
     
 }
-
-//extension LocationManagerDelegate {
-//    func locationDidUpdateWith(city: String, state: String, country: String) {
-//
-//    }
-////    func locationDidChangePermission(to permission:ST_LocationManager.PermissionRequestResult) {
-////
-////    }
-//}

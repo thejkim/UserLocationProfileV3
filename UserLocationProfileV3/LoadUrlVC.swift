@@ -25,7 +25,5 @@ class LoadUrlVC: UIViewController {
             webview.load(request)
         }
     }
-    
-
 
 }

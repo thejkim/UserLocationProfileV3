@@ -75,5 +75,20 @@
 - ~~"Loading" message for user profile~~ apprears once it starts loading, not beforehand
 - Displaying activity indicator instead of displaying "loading" message while loading
 
+[Jun 26]
+Converting it to fullfill MVC design pattern
+FileDataManager(singleton) model implemented: manage FileManager related tasks
+NetworkingManager(singleton) model implemented + NetworkingManagerDelegate protocol with 1 required delegate function, which notifies controller(LocationDisplayVC) when new articles are fetched
+NetworkingManager: manage API related tasks (current: get request)
+
+[Jun 27]
+Converted to fullfill MVC design pattern
+Isolated ViewController to be controller layer
+FileDataManager - formatting filename is included here with helper function(updateFilenameToProperFormat), not in VC
+FileDataManager - Accordingly, by above change, function signatures are modified in multiple places (except for removing file function) to increase reusability
+NetworkingManager - 1 more delegate function defined for reachability
+Reachability - be checked in NetworkingManager, which notifies controller(LocationDisplayVC) if not reachable
+
+
 [TODO]
 - dismiss LocationServiceAuthorizationVC once user made decision on location service permission

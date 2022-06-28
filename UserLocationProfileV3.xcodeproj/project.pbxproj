@@ -73,6 +73,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7412D049286A1D350028AAD5 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				7412D04728690D690028AAD5 /* FileDataManager.swift */,
+				7412D0452869058B0028AAD5 /* NetworkingManager.swift */,
+				745AEF1E2859EECC00F658DE /* Article.swift */,
+				743599922855BFFA008800CE /* LocationManager.swift */,
+				7435999D285674F7008800CE /* CoreDataManager.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		7412D04A286A1D620028AAD5 /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				743599932855BFFA008800CE /* JKAlert.swift */,
+				743599912855BFF9008800CE /* JKLog.swift */,
+				745AEF2C285B383700F658DE /* Reachability.swift */,
+				745AEF24285A015600F658DE /* Constants.swift */,
+			);
+			path = Utility;
+			sourceTree = "<group>";
+		};
 		7435996B2855BF8F008800CE = {
 			isa = PBXGroup;
 			children = (
@@ -94,6 +117,8 @@
 		743599762855BF8F008800CE /* UserLocationProfileV3 */ = {
 			isa = PBXGroup;
 			children = (
+				7412D04A286A1D620028AAD5 /* Utility */,
+				7412D049286A1D350028AAD5 /* Model */,
 				743599772855BF8F008800CE /* AppDelegate.swift */,
 				743599792855BF8F008800CE /* SceneDelegate.swift */,
 				7435998E2855BFD3008800CE /* Main.storyboard */,
@@ -103,19 +128,10 @@
 				743599852855BF94008800CE /* LaunchScreen.storyboard */,
 				745AEF202859F8A300F658DE /* ArticleCell.swift */,
 				743599882855BF94008800CE /* Info.plist */,
-				743599932855BFFA008800CE /* JKAlert.swift */,
-				743599912855BFF9008800CE /* JKLog.swift */,
-				745AEF2C285B383700F658DE /* Reachability.swift */,
 				743599962855BFFA008800CE /* LocationDisplayVC.swift */,
-				7412D04728690D690028AAD5 /* FileDataManager.swift */,
-				7412D0452869058B0028AAD5 /* NetworkingManager.swift */,
-				745AEF24285A015600F658DE /* Constants.swift */,
-				745AEF1E2859EECC00F658DE /* Article.swift */,
 				743599942855BFFA008800CE /* LocationServiceAuthorizationVC.swift */,
-				743599922855BFFA008800CE /* LocationManager.swift */,
 				743599952855BFFA008800CE /* UserProtileVC.swift */,
 				745AEF22285A010000F658DE /* Key.plist */,
-				7435999D285674F7008800CE /* CoreDataManager.swift */,
 				743599802855BF8F008800CE /* UserLocationProfileV3.xcdatamodeld */,
 			);
 			path = UserLocationProfileV3;

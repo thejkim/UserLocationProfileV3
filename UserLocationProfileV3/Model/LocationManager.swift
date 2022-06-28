@@ -27,7 +27,6 @@ class LocationManager : NSObject {
      */
     
     private var locationManager: CLLocationManager?
-    // https://stackoverflow.com/questions/27532897/find-delegate-in-a-swift-array-of-delegates
     weak var delegate: LocationManagerDelegate?
     
     static let shared: LocationManager = {
@@ -125,7 +124,7 @@ class LocationManager : NSObject {
                     print(firstPlacemark.subAdministrativeArea) // county
                     print(firstPlacemark.isoCountryCode) // country code
                     
-                    // M -> C : Notify location update to delegator
+                    // Model -> Controller : Notify location update to delegator
                     self.delegate?.locationDidUpdateWith(city: "\(firstPlacemark.subLocality ?? "N/A")", state: "\(firstPlacemark.locality ?? "N/A")", country: "\(firstPlacemark.country ?? "N/A")", countryCode: "\(firstPlacemark.isoCountryCode ?? "N/A")")
                 }
                 
@@ -160,6 +159,7 @@ extension LocationManager: CLLocationManagerDelegate {
         DispatchQueue.global(qos: .userInteractive).async {
             JKLog.log(message: "\(Thread.current)") // MARK: global queue
             self.getAddress()
+            // chance of crash : delegator VC might not be in memory at this moment -> use notification center instead
         }
     }
     

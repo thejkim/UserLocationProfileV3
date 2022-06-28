@@ -59,12 +59,15 @@ class NetworkingManager {
             do {
                 let jsondata = try JSONSerialization.jsonObject(with: data, options: [])
                 
+                // "Understand responsibility!!! it should only have api related task"
+                // TODO: pass dic["articles"] to Article model, and model does below(loop over array of article) in there
                 let dic = jsondata as! Dictionary<String, Any>
                 guard let fetchedArticles = dic["articles"] as? Array<Dictionary<String, Any>> else { return }
                 for article in fetchedArticles {
                     let newArticle = article
 
                     let newArticleInstance = Article()
+                    // TODO: use init
                     newArticleInstance.author = newArticle["author"] as? String ?? "N/A"
                     newArticleInstance.content = newArticle["content"] as? String ?? "N/A"
                     newArticleInstance.description = newArticle["description"] as? String ?? "N/A"
@@ -83,7 +86,7 @@ class NetworkingManager {
                     articles.append(newArticleInstance)
                     
                 }
-                // M -> C : Notify delegator with updated data
+                // Model -> Controller : Notify delegator with updated data
                 self.delegate?.didUpdateArticles(withArticles: articles)
                     
 

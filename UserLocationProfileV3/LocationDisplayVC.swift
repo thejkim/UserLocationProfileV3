@@ -68,7 +68,7 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
         stateNameLabel.text = state
         countryNameLabel.text = country
         
-        // C -> M : perform API call to generate articles
+        // Controller -> Model : perform API call to generate articles
         currentCountryCode = countryCode.lowercased()
         networkingManager.getArticles(forCountry: currentCountryCode, withKeyword: "")
         
@@ -145,8 +145,8 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
                 // Save image in document directory
                 fileManager.saveImageFrom(for: articles[indexPath.row].title, publishedAt: articles[indexPath.row].publishedAt, withExtension: "png", url: self.articles[indexPath.row].urlToImage)
             } // end of saving images
-            
         }
+
         cell.author.text = articles[indexPath.row].author
         cell.descriptionTextView.text = articles[indexPath.row].description
         cell.publishDate.text = articles[indexPath.row].publishedAt

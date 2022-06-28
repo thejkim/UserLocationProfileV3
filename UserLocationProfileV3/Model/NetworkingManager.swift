@@ -9,20 +9,55 @@ import Foundation
 
 // Weak references are only defined for reference types
 // : if the object conforming to the protocol needs to be stored in a weak property then the protocol must be a class-only protocol.
-protocol NetworkingManagerDelegate: AnyObject {
-    func didUpdateArticles(withArticles: [Article]) // Notify Controller with updated articles
-    func didFailWithReachability() // Notify Controller to inform user
-}
+//protocol NetworkingManagerDelegate: AnyObject {
+//    func didUpdateArticles(withArticles: [Article]) // Notify Controller with updated articles
+//    func didFailWithReachability() // Notify Controller to inform user
+//}
 
 class NetworkingManager {
     
     static let shared = NetworkingManager()
-    weak var delegate: NetworkingManagerDelegate?
+//    weak var delegate: NetworkingManagerDelegate?
     
     private init() {
         
     }
+    
+    func getArticleData(forCountry countryCode: String, withKeyword keyword: String, completion: @escaping (Any) -> ()) {
+        // TODO: get url info from Controller?
+        let baseURLStr = "https://newsapi.org"
+        let endpointURLStr = "/v2/top-headlines"
+        guard let key = FileDataManager.shared.getAPIKey() else {return}
+        
+        let params = "?country=\(countryCode)&q=\(keyword)&apiKey=\(key)"
+        let urlStr = "\(baseURLStr)\(endpointURLStr)\(params)"
 
+        guard let url = URL(string: urlStr) else { return }
+        
+        // MARK: Request Setup
+        var request = URLRequest(url: url)
+
+        request.httpMethod = "GET"
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        
+        let task = URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) -> Void in
+            JKLog.log(message: "dataTask::: \(Thread.current)")
+            
+            guard let data = data else { return }
+            
+            do {
+                let articleData = try JSONSerialization.jsonObject(with: data, options: [])
+                completion(articleData)
+            } catch {
+                
+            }
+            
+        })
+        
+        task.resume()
+    }
+
+    /*
     func getArticles(forCountry countryCode: String, withKeyword keyword: String) {
         JKLog.log(message: "\(countryCode), \(keyword)")
         var articles = [Article]()
@@ -62,6 +97,7 @@ class NetworkingManager {
                 // "Understand responsibility!!! it should only have api related task"
                 // TODO: pass dic["articles"] to Article model, and model does below(loop over array of article) in there
                 let dic = jsondata as! Dictionary<String, Any>
+                                
                 guard let fetchedArticles = dic["articles"] as? Array<Dictionary<String, Any>> else { return }
                 for article in fetchedArticles {
                     let newArticle = article
@@ -99,4 +135,5 @@ class NetworkingManager {
         task.resume()
         
     }
+    */
 }

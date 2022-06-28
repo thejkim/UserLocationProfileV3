@@ -8,25 +8,37 @@
 import UIKit
 import CoreLocation
 
-class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingManagerDelegate, UITextFieldDelegate {
+class LocationDisplayVC: UIViewController, ArticleViewModelDelegate, LocationViewModelDelegate, UITextFieldDelegate {
+
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var stateNameLabel: UILabel!
     @IBOutlet weak var countryNameLabel: UILabel!
     @IBOutlet weak var keywordTF: UITextField!
     @IBOutlet weak var articlesTV: UITableView!
     
-    let locationManager = LocationManager.shared // owns
-    let networkingManager = NetworkingManager.shared // owns
-    let fileManager = FileDataManager.shared // owns
-    var articles = [Article]()
+    var articleViewModel: ArticleViewModel!
+    var locationViewModel: LocationViewModel!
+    var fileViewModel: FileViewModel!
+    
+    let fileManager = FileDataManager.shared // owns -> TODO: how to communicate
+    var articles = [ArticleData]()
     var targetUrlStr: String?
     var currentCountryCode = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        articleViewModel = ArticleViewModel()
+        locationViewModel = LocationViewModel()
+        fileViewModel = FileViewModel()
         
+        locationViewModel.delegate = self
+        articleViewModel.delegate = self
+        
+    }
+    
+    func authorizationDidUpdateTo(permission: LocationManager.PermissionRequestResult) {
         // MARK: Check Location Service Authorization Status
-        switch locationManager.checkAuthorizationStatus() {
+        switch permission {
         case .notDetermined:
             print("notDetermined")
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -51,57 +63,35 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
             self.present(alert, animated: true, completion: nil)
             print("app not allowed to access location info")
         default:
-            print("\(locationManager.checkAuthorizationStatus())")
+            print("passed permission: \(permission)")
         }
-        
-        locationManager.delegate = self
-        networkingManager.delegate = self
-
     }
     
-    // got notified from LocationManager that location is updated
-    // -> perform API call based on the given location
-    func locationDidUpdateWith(city: String, state: String, country: String, countryCode: String) {
-        JKLog.log(message: "\(Thread.current)")
-
+    func locationDidUpdateWith2(city: String, state: String, country: String, countryCode: String) {
+        JKLog.log(message: "LocationDisplayVC")
         cityNameLabel.text = city
         stateNameLabel.text = state
         countryNameLabel.text = country
         
         // Controller -> Model : perform API call to generate articles
         currentCountryCode = countryCode.lowercased()
-        networkingManager.getArticles(forCountry: currentCountryCode, withKeyword: "")
-        
+        articleViewModel.getArticleData(forCountry: currentCountryCode, withKeyword: "")
     }
     
-    // got notified from NetworkingManager that new articles fetched from API call
-    // -> reload tableView with given articles
-    func didUpdateArticles(withArticles: [Article]) {
-        articles = withArticles
-        JKLog.log(message: "thread: \(Thread.current)")
-        // MARK: ASK WHY IT WAS NOT RUNNING ON MAIN THREAD
-        // it is becuase URLSession.shared.dataTask was running on subthread and it got notified from there?
+    func didUpdateArticles2(with: Articles) {
+        articles = with.data
         DispatchQueue.main.async {
             self.articlesTV.reloadData()
         }
     }
     
-    // got notified from NetworkingManager that network is unreachable
-    // -> inform user
-    func didFailWithReachability() {
-        let alert = UIAlertController(title: "Network Unreachable", message: "We cannot reach out the API service", preferredStyle: .alert)
-        let ok = UIAlertAction(title: "OK", style: .cancel, handler: nil)
-        alert.addAction(ok)
-        self.present(alert, animated: true, completion: nil)
-    }
-    
     @IBAction func refreshBarBtnTouched(_ sender: UIBarButtonItem) {
-        networkingManager.getArticles(forCountry: currentCountryCode, withKeyword: "")
+        articleViewModel.getArticleData(forCountry: currentCountryCode, withKeyword: "")
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // Empty string will fetch all articles for given country code
-        networkingManager.getArticles(forCountry: currentCountryCode, withKeyword: textField.text ?? "")
+        articleViewModel.getArticleData(forCountry: currentCountryCode, withKeyword: textField.text ?? "")
         textField.resignFirstResponder()
         return true
     }

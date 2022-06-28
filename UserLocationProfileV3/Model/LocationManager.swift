@@ -9,6 +9,7 @@ import CoreLocation
 
 protocol LocationManagerDelegate: AnyObject { // AnyObject: to ensure delegate is weak reference
     func locationDidUpdateWith(city: String, state: String, country: String, countryCode: String)
+    func authorizationDidCheck(permission: LocationManager.PermissionRequestResult)
 }
 
 class LocationManager : NSObject {
@@ -50,6 +51,9 @@ class LocationManager : NSObject {
 
     func checkAuthorizationStatus() -> PermissionRequestResult {
         print("check authorization status...")
+        
+        var permissionStatus = PermissionRequestResult.notDetermined
+        
         guard let locationManager = locationManager else {
             print("failed to get location manager instance")
             return .notDetermined
@@ -60,17 +64,23 @@ class LocationManager : NSObject {
             switch locationManager.authorizationStatus {
             case .authorizedWhenInUse, .authorizedAlways:
                 locationManager.startUpdatingLocation()
+                permissionStatus = .granted
                 return .granted
             case .notDetermined:
                 print("not determined")
+                permissionStatus = .notDetermined
                 return .notDetermined
             case .denied, .restricted:
                 print("denied/restricted")
+                permissionStatus = .appNotAllowed
                 return .appNotAllowed
             }
         } else {
+            permissionStatus = .systemNotAllowed
             return .systemNotAllowed
         }
+        
+        self.delegate?.authorizationDidCheck(permission: permissionStatus)
     }
     
     func requestWhenInUse() {

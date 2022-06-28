@@ -42,4 +42,28 @@ class Article: Codable {
         self.url = url
         self.urlToImage = urlToImage
     }
+    
+    func constructBusinessModel(root: Dictionary<String, Any>) {
+        var articles = [Article]()
+        guard let fetchedArticles = root["articles"] as? Array<Dictionary<String, Any>> else { return }
+        for article in fetchedArticles {
+            let newArticle = article
+
+            guard let source = newArticle["source"] as? Dictionary<String, Any> else { return } // NSDictionary
+            let newArticleInstance = Article(author: newArticle["author"] as? String ?? "N/A",
+                                             content: newArticle["content"] as? String ?? "N/A",
+                                             description: newArticle["description"] as? String ?? "N/A",
+                                             publishedAt: newArticle["publishedAt"] as? String ?? "N/A",
+                                             sourceID: source["id"] as? String ?? "N/A",
+                                             sourceName: source["name"] as? String ?? "N/A",
+                                             title: newArticle["title"] as? String ?? "N/A",
+                                             url: newArticle["url"] as? String ?? "N/A",
+                                             urlToImage: newArticle["urlToImage"] as? String ?? "N/A")
+            
+            // append - will be passed out to controller
+            articles.append(newArticleInstance)
+        }
+        
+    }
 }
+

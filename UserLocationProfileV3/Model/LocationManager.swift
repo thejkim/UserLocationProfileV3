@@ -27,18 +27,17 @@ class LocationManager : NSObject {
      */
     
     private var locationManager: CLLocationManager?
-    // https://stackoverflow.com/questions/27532897/find-delegate-in-a-swift-array-of-delegates
     weak var delegate: LocationManagerDelegate?
     
-    static let shared: LocationManager = {
-        let instance = LocationManager()
-        return instance
-    }()
+//    static let shared: LocationManager = {
+//        let instance = LocationManager()
+//        return instance
+//    }()
     
-    override init() {
+    static let shared = LocationManager()
+    private override init() {
         super.init()
         self.locationManager = CLLocationManager()
-        JKLog.log(message: "")
         
         guard let locationManager = self.locationManager else {
             return
@@ -55,7 +54,6 @@ class LocationManager : NSObject {
             print("failed to get location manager instance")
             return .notDetermined
         }
-
 
         if CLLocationManager.locationServicesEnabled() {
             switch locationManager.authorizationStatus {
@@ -125,18 +123,12 @@ class LocationManager : NSObject {
                     print(firstPlacemark.subAdministrativeArea) // county
                     print(firstPlacemark.isoCountryCode) // country code
                     
-                    // M -> C : Notify location update to delegator
+                    // Model -> Controller : Notify location update to delegator
                     self.delegate?.locationDidUpdateWith(city: "\(firstPlacemark.subLocality ?? "N/A")", state: "\(firstPlacemark.locality ?? "N/A")", country: "\(firstPlacemark.country ?? "N/A")", countryCode: "\(firstPlacemark.isoCountryCode ?? "N/A")")
                 }
-                
-
             }
         })
-        
-        
     }
-
-
 }
 
 extension LocationManager: CLLocationManagerDelegate {
@@ -160,6 +152,7 @@ extension LocationManager: CLLocationManagerDelegate {
         DispatchQueue.global(qos: .userInteractive).async {
             JKLog.log(message: "\(Thread.current)") // MARK: global queue
             self.getAddress()
+            // chance of crash : delegator VC might not be in memory at this moment -> use notification center instead
         }
     }
     
@@ -169,13 +162,10 @@ extension LocationManager: CLLocationManagerDelegate {
         }
         locationManager.requestLocation()
     }
-    
-    
 }
 
 extension LocationManager {
     enum PermissionRequestResult {
         case granted, notDetermined, appNotAllowed, systemNotAllowed
     }
-    
 }

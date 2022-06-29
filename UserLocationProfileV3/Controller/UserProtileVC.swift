@@ -77,11 +77,12 @@ class UserProtileVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
                     } else { // not found
                         DispatchQueue.main.async {
                             self.profileImageBtn.setTitle("", for: .normal)
+                            self.profileImageLoadingActivityIndicator.isHidden = true
                         }
                     }
                     
                 } catch {
-                    
+                    JKLog.log(message: "catched!")
                 }
 
             }

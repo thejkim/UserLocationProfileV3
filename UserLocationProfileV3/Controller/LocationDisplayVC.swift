@@ -15,13 +15,13 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
     @IBOutlet weak var keywordTF: UITextField!
     @IBOutlet weak var articlesTV: UITableView!
     
-    let locationManager = LocationManager.shared // owns
-    let networkingManager = NetworkingManager.shared // owns
-    let fileManager = FileDataManager.shared // owns
-    var articles = [Article]()
+    let locationManager = LocationManager.shared
+    let networkingManager = NetworkingManager() // owns
+    var articles = [ArticleData]() // datasource for articlesTV
+    
     var targetUrlStr: String?
     var currentCountryCode = ""
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -53,10 +53,9 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
         default:
             print("\(locationManager.checkAuthorizationStatus())")
         }
-        
+
         locationManager.delegate = self
         networkingManager.delegate = self
-
     }
     
     // got notified from LocationManager that location is updated
@@ -68,22 +67,40 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
         stateNameLabel.text = state
         countryNameLabel.text = country
         
-        // C -> M : perform API call to generate articles
         currentCountryCode = countryCode.lowercased()
-        networkingManager.getArticles(forCountry: currentCountryCode, withKeyword: "")
+        
+        // MARK: Controller -> Model : perform API call to generate articles
+
+        // Method 1: Using Delegation Data Binding
+        networkingManager.getArticlesFor(endPoint: "/v2/top-headlines", queries: ["country":currentCountryCode])
+
+        /* // Method 2: Using Callbacks Data Binding (Completion Handler)
+        networkingManager.getArticleData(endPoint: "/v2/top-headlines", queries: ["country":currentCountryCode]) { [weak self] data in
+            self?.articles = Articles(articleData: data).list
+            DispatchQueue.main.async {
+                self?.articlesTV.reloadData()
+            }
+        } onFailure: { error in
+            JKLog.log(message: error.localizedDescription)
+        }
+        */
         
     }
     
+    // Method 1: Using Delegation Data Binding
     // got notified from NetworkingManager that new articles fetched from API call
     // -> reload tableView with given articles
-    func didUpdateArticles(withArticles: [Article]) {
-        articles = withArticles
+    func didUpdateArticles(withArticles: Articles) {
+        articles = withArticles.list
         JKLog.log(message: "thread: \(Thread.current)")
-        // MARK: ASK WHY IT WAS NOT RUNNING ON MAIN THREAD
-        // it is becuase URLSession.shared.dataTask was running on subthread and it got notified from there?
         DispatchQueue.main.async {
             self.articlesTV.reloadData()
         }
+    }
+    
+    // got notified from NetworkingManager that API call failed
+    func didFailUpdateArticles(withError: Error) {
+        JKLog.log(message: withError.localizedDescription)
     }
     
     // got notified from NetworkingManager that network is unreachable
@@ -96,12 +113,13 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
     }
     
     @IBAction func refreshBarBtnTouched(_ sender: UIBarButtonItem) {
-        networkingManager.getArticles(forCountry: currentCountryCode, withKeyword: "")
+        networkingManager.getArticlesFor(endPoint: "/v2/top-headlines", queries: ["country":currentCountryCode])
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        // Empty string will fetch all articles for given country code
-        networkingManager.getArticles(forCountry: currentCountryCode, withKeyword: textField.text ?? "")
+        // Empty input will fetch all articles for given country code
+        networkingManager.getArticlesFor(endPoint: "/v2/top-headlines", queries: ["country":currentCountryCode, "q":textField.text ?? ""])
+
         textField.resignFirstResponder()
         return true
     }
@@ -122,7 +140,7 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
         
         // MARK: Check if image already exists in document directory
         // Load image data if exists from document directory in main queue serially
-        if let loadedImageData = fileManager.loadImageIfAvailable(for: articles[indexPath.row].title, publishedAt: articles[indexPath.row].publishedAt, withExtension: "png") {
+        if let loadedImageData = FileDataManager.loadImageIfAvailable(for: articles[indexPath.row].title, publishedAt: articles[indexPath.row].publishedAt, withExtension: "png") {
             cell.imageView?.image = UIImage(data: loadedImageData)
             JKLog.log(message: "File exists. Loaded image from document directory")
         } else {
@@ -140,13 +158,13 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
             if indexPath.row < 10 {
                 JKLog.log(message: "Saving image file...")
                 // Check # of files in doc dir and remove file if needed
-                fileManager.removeOldestFileIfCountExceeds()
+                FileDataManager.removeOldestFileIfCountExceeds()
                                 
                 // Save image in document directory
-                fileManager.saveImageFrom(for: articles[indexPath.row].title, publishedAt: articles[indexPath.row].publishedAt, withExtension: "png", url: self.articles[indexPath.row].urlToImage)
+                FileDataManager.saveImageFrom(for: articles[indexPath.row].title, publishedAt: articles[indexPath.row].publishedAt, withExtension: "png", url: self.articles[indexPath.row].urlToImage)
             } // end of saving images
-            
         }
+
         cell.author.text = articles[indexPath.row].author
         cell.descriptionTextView.text = articles[indexPath.row].description
         cell.publishDate.text = articles[indexPath.row].publishedAt

@@ -21,7 +21,7 @@ class ArticleCell: UITableViewCell {
         // Initialization code
         articleImage.clipsToBounds = true
 //        articleImage.contentMode = .scaleAspectFill
-//        articleImage.sizeToFit()
+        articleImage.sizeToFit()
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

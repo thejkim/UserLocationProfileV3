@@ -23,10 +23,6 @@ class LocationServiceAuthorizationVC: UIViewController {
         super.viewDidLoad()
         print("in LocationServiceAuthorizationVC")
         
-//        locationManager.delegate = self
-        
-//        checkAuthorizationStatus()
-        
     }
     
     func checkAuthorizationStatus() {

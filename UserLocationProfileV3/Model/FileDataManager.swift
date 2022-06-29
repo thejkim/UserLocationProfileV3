@@ -8,12 +8,12 @@
 import Foundation
 
 class FileDataManager {
-    static let shared = FileDataManager()
-    private init() {
-        
-    }
+//    static let shared = FileDataManager()
+//    private init() {
+//
+//    }
     
-    func getAPIKey() -> String? {
+    static func getAPIKey() -> String? {
         if let path = Bundle.main.path(forResource: Constants.KEY_PLIST_NAME, ofType: "plist") {
             if let dic = NSDictionary(contentsOfFile: path) as? Dictionary<String, String> {
                 if let value = dic[Constants.API_KEY] {
@@ -24,7 +24,7 @@ class FileDataManager {
         return nil
     }
     
-    private func updateFilenameToProperFormat(from givenFileName: String) -> String {
+    static func updateFilenameToProperFormat(from givenFileName: String) -> String {
         /* When saved, white space will be replaced by %
                        :                            by /
          */
@@ -37,7 +37,7 @@ class FileDataManager {
     }
     
     // TODO: modify param to get full file name and extension (.extension) for better reusability - DONE
-    func checkIfFileExists(for title: String, publishedAt: String, withExtension: String) -> Bool {
+    static func checkIfFileExists(for title: String, publishedAt: String, withExtension: String) -> Bool {
         print("title=\(title)")
         var givenFileName = "\(title)_\(publishedAt).\(withExtension)"
         givenFileName = updateFilenameToProperFormat(from: givenFileName)
@@ -61,7 +61,7 @@ class FileDataManager {
         return isFound
     }
     
-    func loadImageIfAvailable(for title: String, publishedAt: String, withExtension: String) -> Data? { // String
+    static func loadImageIfAvailable(for title: String, publishedAt: String, withExtension: String) -> Data? { // String
         var loadedImageData: Data?
         
         var givenFileName = "\(title)_\(publishedAt).\(withExtension)"
@@ -83,7 +83,7 @@ class FileDataManager {
         return loadedImageData
     }
     
-    func saveImageFrom(for title: String, publishedAt: String, withExtension: String, url: String) {
+    static func saveImageFrom(for title: String, publishedAt: String, withExtension: String, url: String) {
         var givenFileName = "\(title)_\(publishedAt).\(withExtension)"
         givenFileName = updateFilenameToProperFormat(from: givenFileName)
         
@@ -109,7 +109,7 @@ class FileDataManager {
         } // end of subthread
     }
     
-    func removeOldestFileIfCountExceeds() {
+    static func removeOldestFileIfCountExceeds() {
         var oldestFile = ""
         let delimiter = "_"
         var publishedDate = ""

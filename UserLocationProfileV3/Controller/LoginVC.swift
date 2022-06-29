@@ -13,10 +13,8 @@ class LoginVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
     }
     
-
     @IBAction func loginBtnTouched(_ sender: UIButton) {
         // SAVE INTO CORE DATA
         if let usernameInput = usernameTF.text {

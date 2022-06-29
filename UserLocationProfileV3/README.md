@@ -89,6 +89,15 @@ FileDataManager - Accordingly, by above change, function signatures are modified
 NetworkingManager - 1 more delegate function defined for reachability
 Reachability - be checked in NetworkingManager, which notifies controller(LocationDisplayVC) if not reachable
 
+[Jun 28]
+FileDataManager, CoreDataManager, LocationManager : Application-level service provider model
+NetworkingManager : Data Model in MVC
+NetworkingManager 
+    - getArticles() function signature modified : getting endPoint url string and queries(dictionary) to make it have common code in its body
+    - url generate : from the params, using them in urlComponents
+    - 2 versions of communication : delegations and callbacks(onSuccess, onFailure) data binding
+Articles : Data Model in MVC
+    - object parser
 
 [TODO]
 - dismiss LocationServiceAuthorizationVC once user made decision on location service permission

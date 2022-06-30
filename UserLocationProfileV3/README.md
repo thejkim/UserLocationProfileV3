@@ -102,6 +102,32 @@ Articles : Data Model in MVC
 Redundant/over use of Singleton pattern removed
 Static methods added where applicable (FileDataManager)
 
+[Jun 29-30]
+MVC -> MVVM
+1. ViewModel (APIViewModel.swift)
+    - sendGetRequest
+        a. Network check
+        b. Full URL generate
+        c. URLRequest setup for HTTPHeaderField
+        d. Data processing & binding between NetworkingManager model
+            - callbacks from NetworkingManager model
+            - notifyng LocationDisplayVC with newly created business data model
+    - prepareBusinessModel: Articles -> ArticlesToDisplay with imageData downloading
+    - saveImage: with help of FileDataManager
+        - filename logic changed: "<author>_<publishedAt>.<fileExtension>"
+    - generateFullFilename: generate full file name with extension to use in FileManager related task
+2. View/ViewController
+    - LocationDisplayVC
+        a. Hard-coded constants are replaced by Constants struct
+        b. Alerts are created with help of JKAlert utility class and Constants struct
+        c. Conforming 
+            - App-level model (LocationManagerDelegate) protocol
+            - ViewModel (APIViewModel) protocol
+        d. Finding, Loading, Saving Image data is delegated to ViewModel (APIViewModel)
+3. Model
+    - Business data model implemented
+4. Utility
+    - Constants, JKAlert updated
+
 [TODO]
 - dismiss LocationServiceAuthorizationVC once user made decision on location service permission
-- create business model for Article

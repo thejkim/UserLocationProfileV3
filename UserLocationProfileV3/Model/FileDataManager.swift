@@ -8,10 +8,6 @@
 import Foundation
 
 struct FileDataManager {
-//    static let shared = FileDataManager()
-//    private init() {
-//
-//    }
     
     static func getAPIKey() -> String? {
         if let path = Bundle.main.path(forResource: Constants.KEY_PLIST_NAME, ofType: "plist") {
@@ -81,6 +77,37 @@ struct FileDataManager {
                 
         }
         return loadedImageData
+    }
+    
+    static func getImage(of filename: String) -> Data? {
+        var loadedImageData: Data?
+
+        if let targetURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(filename) {
+            do {
+                loadedImageData = try Data(contentsOf: targetURL)
+                JKLog.log(message: "Image data loaded!")
+            } catch {
+//                print("Failed to download image data from document directory for \(targetURL)")
+            }
+        }
+        return loadedImageData
+    }
+    
+    static func saveImage(of filename: String, withImage data: Data) {
+        // Save image in document directory
+        DispatchQueue.global(qos: .background).async {
+            if let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                let outputFileURL = documentURL.appendingPathComponent(filename)
+             
+                do {
+                    try data.write(to: outputFileURL)
+                    print("File saved: \(outputFileURL)")
+                } catch {
+                    JKLog.log(message: "Failed to save image: \(error)")
+                }
+            }
+
+        } // end of subthread
     }
     
     static func saveImageFrom(for title: String, publishedAt: String, withExtension: String, url: String) {

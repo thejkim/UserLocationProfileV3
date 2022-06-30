@@ -23,15 +23,8 @@ class LoginVC: UIViewController {
             }
             // navigate...
         } else {
-            let alert = UIAlertController(title: "Register Failed", message: "Please enter username.", preferredStyle: .alert)
-            let ok = UIAlertAction(title: "OK", style: .default, handler: nil)
-            alert.addAction(ok)
-            present(alert, animated: true, completion: nil)
+            JKAlert.showOK(title: Constants.AlertMessages.USER_REGISTER_FAIL_TITLE, message: Constants.AlertMessages.USER_REGISTER_FAIL_MESSAGE, on: self)
         }
     }
-    
-//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-//
-//    }
 
 }

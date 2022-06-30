@@ -8,7 +8,8 @@
 import UIKit
 import CoreLocation
 
-class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingManagerDelegate, UITextFieldDelegate {
+class LocationDisplayVC: UIViewController, LocationManagerDelegate, APIViewModelDelegate, UITextFieldDelegate {
+    
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var stateNameLabel: UILabel!
     @IBOutlet weak var countryNameLabel: UILabel!
@@ -16,8 +17,8 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
     @IBOutlet weak var articlesTV: UITableView!
     
     let locationManager = LocationManager.shared
-    let networkingManager = NetworkingManager() // owns
-    var articles = [ArticleData]() // datasource for articlesTV
+    var apiComminicator = APIViewModel()
+    var articles = [ArticleToDisplay]() // datasource for articlesTV
     
     var targetUrlStr: String?
     var currentCountryCode = ""
@@ -28,34 +29,19 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
         // MARK: Check Location Service Authorization Status
         switch locationManager.checkAuthorizationStatus() {
         case .notDetermined:
-            print("notDetermined")
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let destinationVC = storyboard.instantiateViewController(identifier: "LocationServiceAuthorizationVC")
+            let storyboard = UIStoryboard(name: Constants.Identifiers.MAIN_STORYBOARD, bundle: nil)
+            let destinationVC = storyboard.instantiateViewController(identifier: Constants.Identifiers.LOCATION_SERVICE_AUTH_VC)
             present(destinationVC, animated: true, completion: nil)
-        case .systemNotAllowed:
-            print("location service disabled")
-            let alert = UIAlertController(title: "Location Service Disabled", message: "Location service is disabled. Please go to Settings, enabled the location service to allow the app access to your current location.", preferredStyle: .alert)
-            let ok = UIAlertAction(title: "OK", style: .default, handler: nil)
-            alert.addAction(ok)
-            self.present(alert, animated: true, completion: nil)
-        case .appNotAllowed:
-            let alert = UIAlertController(title: "App Not Authorized", message: "We are not authorized to access your location information. Please go to App Settings, enabled the location service of the app to give access to your current location.", preferredStyle: .alert)
-            let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-            let openSettings = UIAlertAction(title: "Open Settings", style: .default, handler: {(action ) in
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
-            })
-            alert.addAction(cancel)
-            alert.addAction(openSettings)
-            self.present(alert, animated: true, completion: nil)
-            print("app not allowed to access location info")
+        case .systemNotAllowed: // location service disabled
+            JKAlert.showOK(title: Constants.AlertMessages.LOCATION_SERVICE_DISABLED_TITLE, message: Constants.AlertMessages.LOCATION_SERVICE_DISABLED_MESSAGE, on: self)
+        case .appNotAllowed: // authorization denied by user
+            JKAlert.showAndOpenURL(title: Constants.AlertMessages.LOCATION_SERVICE_NOT_AUTH_TITLE, message: Constants.AlertMessages.LOCATION_SERVICE_NOT_AUTH_MESSAGE, open: URL(string: UIApplication.openSettingsURLString), on: self)
         default:
             print("\(locationManager.checkAuthorizationStatus())")
         }
 
         locationManager.delegate = self
-        networkingManager.delegate = self
+        apiComminicator.delegate = self
     }
     
     // got notified from LocationManager that location is updated
@@ -69,103 +55,82 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
         
         currentCountryCode = countryCode.lowercased()
         
-        // MARK: Controller -> Model : perform API call to generate articles
-
-        // Method 1: Using Delegation Data Binding
-        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY:currentCountryCode])
-
-         // Method 2: Using Callbacks Data Binding (Completion Handler)
-        networkingManager.getArticleData(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY:currentCountryCode]) { [weak self] data in
-            self?.articles = Articles(articleData: data).list
-            DispatchQueue.main.async {
-                self?.articlesTV.reloadData()
-            }
-        } onFailure: { error in
-            JKLog.log(message: error.localizedDescription)
-        }
-        
-        
+        // MARK: View -> ViewModel : perform API call to generate articles
+        apiComminicator.sendGetRequest(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY: currentCountryCode])
     }
     
-    // Method 1: Using Delegation Data Binding
-    // got notified from NetworkingManager that new articles fetched from API call
-    // -> reload tableView with given articles
-    func didUpdateArticles(withArticles: Articles) {
+    // MARK: Data Binding Delegate Functions - MVVM
+    // got notified from NetworkingViewModel that new business model is ready to be displayed
+    func didUpdateArticles(withArticles: ArticlesToDisplay) {
         articles = withArticles.list
-        JKLog.log(message: "thread: \(Thread.current)")
         DispatchQueue.main.async {
             self.articlesTV.reloadData()
         }
     }
     
-    // got notified from NetworkingManager that API call failed
+    // got notified from NetworkingViewModel that fetching articles from newsAPI failed for given reason(error)
     func didFailUpdateArticles(withError: Error) {
-        JKLog.log(message: withError.localizedDescription)
+        switch withError as? NetworkingManager.APIRequestError {
+        case .dataNotFound: // inform user
+            JKAlert.showOK(title: Constants.AlertMessages.API_CALL_FAIL_TITLE, message: Constants.AlertMessages.API_CALL_FAIL_MESSAGE, on: self)
+        default: // got error from server OR .decodingFailed, .keyNotFound, .urlComponentNotFound, .urlUnwrappingFailed
+            JKLog.log(message: "\(withError.localizedDescription)")
+        }
     }
     
-    // got notified from NetworkingManager that network is unreachable
-    // -> inform user
+    // got notified from NetworkingViewModel that there's network issue before API call
     func didFailWithReachability() {
-        let alert = UIAlertController(title: "Network Unreachable", message: "We cannot reach out the API service", preferredStyle: .alert)
-        let ok = UIAlertAction(title: "OK", style: .cancel, handler: nil)
-        alert.addAction(ok)
-        self.present(alert, animated: true, completion: nil)
+        JKAlert.showOK(title: Constants.AlertMessages.NETWORK_REACHABILITY_FAIL_TITLE, message: Constants.AlertMessages.NETWORK_REACHABILITY_FAIL_MESSAGE, on: self)
     }
     
+    // MARK: User Action Binding: Refresh
     @IBAction func refreshBarBtnTouched(_ sender: UIBarButtonItem) {
-        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY:currentCountryCode, "q":keywordTF.text ?? ""])
+        // MARK: MVVM
+        apiComminicator.sendGetRequest(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY: currentCountryCode, Constants.NEWSAPI_QUERY_PARAM_KEY: keywordTF.text ?? ""])
     }
     
+    // MARK: User Action Binding: Search
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        // MARK: MVVM
         // Empty input will fetch all articles for given country code
-        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY:currentCountryCode, Constants.NEWSAPI_QUERY_PARAM_KEY:textField.text ?? ""])
-
+        apiComminicator.sendGetRequest(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY: currentCountryCode, Constants.NEWSAPI_QUERY_PARAM_KEY: textField.text ?? ""])
+        
         textField.resignFirstResponder()
         return true
     }
-    
 }
 
+
+// MARK: TableView Delegate & DataSource
 extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        JKLog.log(message: "articles.count: \(articles.count)")
         return articles.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleCell") as! ArticleCell
-        var targetArticle = articles[indexPath.row]
-        // take it out articles[indexPath.row] -> var. reuse it
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.Identifiers.ARTICLE_CELL) as! ArticleCell
+        let targetArticle = articles[indexPath.row]
+
         cell.sourceName.text = targetArticle.sourceName
         cell.title.text = targetArticle.title
         
-        // MARK: Check if image already exists in document directory
-        // Load image data if exists from document directory in main queue serially
-        if let loadedImageData = FileDataManager.loadImageIfAvailable(for: targetArticle.title, publishedAt: targetArticle.publishedAt, withExtension: "png") {
-            cell.imageView?.image = UIImage(data: loadedImageData)
-            JKLog.log(message: "File exists. Loaded image from document directory")
-        } else {
-            JKLog.log(message: "Downloading image file...")
-            if let imageURL = URL(string: targetArticle.urlToImage) {
-                if let imageData = try? Data(contentsOf: imageURL) {
-                    let image = UIImage(data: imageData)
-                    cell.imageView?.image = image
-                } else {
-                    cell.imageView?.image = UIImage(systemName: "rec")
-                }
-            }
-            
+        // Load image data if available
+        if let imageData = targetArticle.imageData {
+            cell.imageView?.image = UIImage(data: imageData)
             // MARK: Save first 10 images in document directory if needed
             if indexPath.row < 10 {
                 JKLog.log(message: "Saving image file...")
                 // Check # of files in doc dir and remove file if needed
                 FileDataManager.removeOldestFileIfCountExceeds()
-                                
+                
                 // Save image in document directory
-                FileDataManager.saveImageFrom(for: targetArticle.title, publishedAt: targetArticle.publishedAt, withExtension: "png", url: targetArticle.urlToImage)
-            } // end of saving images
-        }
+                apiComminicator.saveImage(for: targetArticle.author, publishedAt: targetArticle.publishedAt, withExtension: Constants.IMAGE_EXTENSION, imageData: imageData)
 
+            } // end of saving images
+        } else {
+            cell.imageView?.image = UIImage(systemName: Constants.Assets.DEFAULT_SYSTEM_IMAGE) // default image for case of no image fetched from API
+        }
+        
         cell.author.text = targetArticle.author
         cell.descriptionTextView.text = targetArticle.description
         cell.publishDate.text = targetArticle.publishedAt
@@ -173,23 +138,17 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
  
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        JKLog.log(message: "selected!")
-        
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {        
         // Perform segue to load url in webview
         targetUrlStr = articles[indexPath.row].url
         
         // Present VC to load url in webview
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let destinationVC = storyboard.instantiateViewController(identifier: "LoadUrlVC") as! LoadUrlVC
+        let storyboard = UIStoryboard(name: Constants.Identifiers.MAIN_STORYBOARD, bundle: nil)
+        let destinationVC = storyboard.instantiateViewController(identifier: Constants.Identifiers.LOAD_URL_VC) as! LoadUrlVC
         destinationVC.targetUrlStr = targetUrlStr
         present(destinationVC, animated: true, completion: nil)
         
     }
-    
-//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        return 281
-//    }
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension

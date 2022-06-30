@@ -50,3 +50,21 @@ struct ArticleData: Codable {
     var urlToImage: String
 }
 
+struct ArticlesToDisplay: Codable {
+    var list = [ArticleToDisplay]()
+    
+    init(articles: [ArticleToDisplay]) { // TODO: what to get?
+        list = articles
+    }
+    
+}
+
+struct ArticleToDisplay: Codable {
+    var author: String
+    var description: String
+    var publishedAt: String
+    var sourceName: String
+    var title: String
+    var url: String
+    var imageData: Data? // if image found in document directory -> valid value / else -> nil(should download in View)
+}

@@ -72,10 +72,10 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
         // MARK: Controller -> Model : perform API call to generate articles
 
         // Method 1: Using Delegation Data Binding
-        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: ["country":currentCountryCode])
+        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY:currentCountryCode])
 
          // Method 2: Using Callbacks Data Binding (Completion Handler)
-        networkingManager.getArticleData(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: ["country":currentCountryCode]) { [weak self] data in
+        networkingManager.getArticleData(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY:currentCountryCode]) { [weak self] data in
             self?.articles = Articles(articleData: data).list
             DispatchQueue.main.async {
                 self?.articlesTV.reloadData()
@@ -113,12 +113,12 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
     }
     
     @IBAction func refreshBarBtnTouched(_ sender: UIBarButtonItem) {
-        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: ["country":currentCountryCode, "q":keywordTF.text ?? ""])
+        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY:currentCountryCode, "q":keywordTF.text ?? ""])
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // Empty input will fetch all articles for given country code
-        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: ["country":currentCountryCode, "q":textField.text ?? ""])
+        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: [Constants.NEWSAPI_COUNTRY_PARAM_KEY:currentCountryCode, Constants.NEWSAPI_QUERY_PARAM_KEY:textField.text ?? ""])
 
         textField.resignFirstResponder()
         return true
@@ -134,19 +134,19 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleCell") as! ArticleCell
-        
+        var targetArticle = articles[indexPath.row]
         // take it out articles[indexPath.row] -> var. reuse it
-        cell.sourceName.text = articles[indexPath.row].sourceName
-        cell.title.text = articles[indexPath.row].title
+        cell.sourceName.text = targetArticle.sourceName
+        cell.title.text = targetArticle.title
         
         // MARK: Check if image already exists in document directory
         // Load image data if exists from document directory in main queue serially
-        if let loadedImageData = FileDataManager.loadImageIfAvailable(for: articles[indexPath.row].title, publishedAt: articles[indexPath.row].publishedAt, withExtension: "png") {
+        if let loadedImageData = FileDataManager.loadImageIfAvailable(for: targetArticle.title, publishedAt: targetArticle.publishedAt, withExtension: "png") {
             cell.imageView?.image = UIImage(data: loadedImageData)
             JKLog.log(message: "File exists. Loaded image from document directory")
         } else {
             JKLog.log(message: "Downloading image file...")
-            if let imageURL = URL(string: articles[indexPath.row].urlToImage) {
+            if let imageURL = URL(string: targetArticle.urlToImage) {
                 if let imageData = try? Data(contentsOf: imageURL) {
                     let image = UIImage(data: imageData)
                     cell.imageView?.image = image
@@ -162,13 +162,13 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
                 FileDataManager.removeOldestFileIfCountExceeds()
                                 
                 // Save image in document directory
-                FileDataManager.saveImageFrom(for: articles[indexPath.row].title, publishedAt: articles[indexPath.row].publishedAt, withExtension: "png", url: self.articles[indexPath.row].urlToImage)
+                FileDataManager.saveImageFrom(for: targetArticle.title, publishedAt: targetArticle.publishedAt, withExtension: "png", url: targetArticle.urlToImage)
             } // end of saving images
         }
 
-        cell.author.text = articles[indexPath.row].author
-        cell.descriptionTextView.text = articles[indexPath.row].description
-        cell.publishDate.text = articles[indexPath.row].publishedAt
+        cell.author.text = targetArticle.author
+        cell.descriptionTextView.text = targetArticle.description
+        cell.publishDate.text = targetArticle.publishedAt
         return cell
  
     }

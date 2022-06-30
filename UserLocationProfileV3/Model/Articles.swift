@@ -24,21 +24,19 @@ struct Articles: Codable {
 
             guard let source = newArticle["source"] as? Dictionary<String, Any> else { return [] } // NSDictionary
             let newArticleInstance = ArticleData(author: newArticle["author"] as? String ?? "N/A",
-                                             content: newArticle["content"] as? String ?? "N/A",
-                                             description: newArticle["description"] as? String ?? "N/A",
-                                             publishedAt: newArticle["publishedAt"] as? String ?? "N/A",
-                                             sourceID: source["id"] as? String ?? "N/A",
-                                             sourceName: source["name"] as? String ?? "N/A",
-                                             title: newArticle["title"] as? String ?? "N/A",
-                                             url: newArticle["url"] as? String ?? "N/A",
-                                             urlToImage: newArticle["urlToImage"] as? String ?? "N/A")
+                                                 content: newArticle["content"] as? String ?? "N/A",
+                                                 description: newArticle["description"] as? String ?? "N/A",
+                                                 publishedAt: newArticle["publishedAt"] as? String ?? "N/A",
+                                                 sourceID: source["id"] as? String ?? "N/A",
+                                                 sourceName: source["name"] as? String ?? "N/A",
+                                                 title: newArticle["title"] as? String ?? "N/A",
+                                                 url: newArticle["url"] as? String ?? "N/A",
+                                                 urlToImage: newArticle["urlToImage"] as? String ?? "N/A")
             articles.append(newArticleInstance)
         }
         return articles
     }
 }
-
-
 
 struct ArticleData: Codable {
     var author: String

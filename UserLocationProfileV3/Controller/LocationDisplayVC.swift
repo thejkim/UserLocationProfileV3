@@ -21,7 +21,7 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
     
     var targetUrlStr: String?
     var currentCountryCode = ""
-        
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -72,10 +72,10 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
         // MARK: Controller -> Model : perform API call to generate articles
 
         // Method 1: Using Delegation Data Binding
-        networkingManager.getArticlesFor(endPoint: "/v2/top-headlines", queries: ["country":currentCountryCode])
+        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: ["country":currentCountryCode])
 
-        /* // Method 2: Using Callbacks Data Binding (Completion Handler)
-        networkingManager.getArticleData(endPoint: "/v2/top-headlines", queries: ["country":currentCountryCode]) { [weak self] data in
+         // Method 2: Using Callbacks Data Binding (Completion Handler)
+        networkingManager.getArticleData(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: ["country":currentCountryCode]) { [weak self] data in
             self?.articles = Articles(articleData: data).list
             DispatchQueue.main.async {
                 self?.articlesTV.reloadData()
@@ -83,7 +83,7 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
         } onFailure: { error in
             JKLog.log(message: error.localizedDescription)
         }
-        */
+        
         
     }
     
@@ -113,12 +113,12 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, NetworkingMa
     }
     
     @IBAction func refreshBarBtnTouched(_ sender: UIBarButtonItem) {
-        networkingManager.getArticlesFor(endPoint: "/v2/top-headlines", queries: ["country":currentCountryCode])
+        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: ["country":currentCountryCode, "q":keywordTF.text ?? ""])
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // Empty input will fetch all articles for given country code
-        networkingManager.getArticlesFor(endPoint: "/v2/top-headlines", queries: ["country":currentCountryCode, "q":textField.text ?? ""])
+        networkingManager.getArticlesFor(endPoint: Constants.END_POINT_TOP_HEADLINES, queries: ["country":currentCountryCode, "q":textField.text ?? ""])
 
         textField.resignFirstResponder()
         return true
@@ -135,6 +135,7 @@ extension LocationDisplayVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleCell") as! ArticleCell
         
+        // take it out articles[indexPath.row] -> var. reuse it
         cell.sourceName.text = articles[indexPath.row].sourceName
         cell.title.text = articles[indexPath.row].title
         

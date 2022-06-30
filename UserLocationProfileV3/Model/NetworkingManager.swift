@@ -98,7 +98,7 @@ class NetworkingManager {
                 guard let data = data else { return }
                 
                 do {
-                    let jsondata = try JSONSerialization.jsonObject(with: data, options: [])
+                    let jsondata = try JSONSerialization.jsonObject(with: data, options: []) // include this too in model
                     let articles = Articles(articleData: jsondata)
                     self.delegate?.didUpdateArticles(withArticles: articles)
 

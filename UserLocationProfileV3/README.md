@@ -98,6 +98,10 @@ NetworkingManager
     - 2 versions of communication : delegations and callbacks(onSuccess, onFailure) data binding
 Articles : Data Model in MVC
     - object parser
+    - article list holder
+Redundant/over use of Singleton pattern removed
+Static methods added where applicable (FileDataManager)
 
 [TODO]
 - dismiss LocationServiceAuthorizationVC once user made decision on location service permission
+- create business model for Article

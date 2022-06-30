@@ -92,7 +92,6 @@
 				743599932855BFFA008800CE /* JKAlert.swift */,
 				743599912855BFF9008800CE /* JKLog.swift */,
 				745AEF2C285B383700F658DE /* Reachability.swift */,
-				745AEF24285A015600F658DE /* Constants.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -154,6 +153,7 @@
 				7412D05C286BF09B0028AAD5 /* Controller */,
 				7412D049286A1D350028AAD5 /* Model */,
 				7412D04A286A1D620028AAD5 /* Utility */,
+				745AEF24285A015600F658DE /* Constants.swift */,
 				743599832855BF94008800CE /* Assets.xcassets */,
 				743599882855BF94008800CE /* Info.plist */,
 				745AEF22285A010000F658DE /* Key.plist */,

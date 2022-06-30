@@ -7,7 +7,7 @@
 
 import Foundation
 
-class FileDataManager {
+struct FileDataManager {
 //    static let shared = FileDataManager()
 //    private init() {
 //

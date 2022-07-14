@@ -16,12 +16,12 @@ protocol APIViewModelDelegate: AnyObject {
 }
 
 struct APIViewModel {
-    private let networkingManager = NetworkingManager()
+    private let networkingManager = NetworkingManager() // owns
     weak var delegate: APIViewModelDelegate?
     
     func sendGetRequest(endPoint: String, queries: [String: String]) {
         // MARK: 1. Network Check
-        let reachability = try? Reachability()
+        let reachability = try? Reachability() // Service provider
         if let isReachable = reachability?.isReachable {
             if !isReachable { // Notify Controller it's unreachable
                 self.delegate?.didFailWithReachability()
@@ -31,11 +31,11 @@ struct APIViewModel {
         // MARK: 2. Generate Full URL
         let baseURLStr = Constants.NEWSAPI_BASEURL + endPoint
         guard let key = FileDataManager.getAPIKey() else { // get api key from plist
-            self.delegate?.didFailUpdateArticles(withError: NetworkingManager.APIRequestError.keyNotFound)
+            self.delegate?.didFailUpdateArticles(withError: NetworkingManager.APIRequestError.keyNotFound) // Notify V
             return
         }
         guard var urlComponents = URLComponents(string: baseURLStr) else {
-            self.delegate?.didFailUpdateArticles(withError: NetworkingManager.APIRequestError.urlComponentNotFound)
+            self.delegate?.didFailUpdateArticles(withError: NetworkingManager.APIRequestError.urlComponentNotFound) // Notify V
             return
         }
         urlComponents.queryItems = queries.map { (key, value) in
@@ -43,7 +43,7 @@ struct APIViewModel {
         }
         urlComponents.queryItems?.append(URLQueryItem(name: Constants.NEWSAPI_APIKEY_KEY, value: key))
         guard let url = urlComponents.url else {
-            self.delegate?.didFailUpdateArticles(withError: NetworkingManager.APIRequestError.urlUnwrappingFailed)
+            self.delegate?.didFailUpdateArticles(withError: NetworkingManager.APIRequestError.urlUnwrappingFailed) // Notify V
             return
         }
         
@@ -57,7 +57,7 @@ struct APIViewModel {
             prepareBusinessModel(with: Articles(articleData: data))
         } onFailure: { err in
             JKLog.log(message: "\(err)")
-            self.delegate?.didFailUpdateArticles(withError: err)
+            self.delegate?.didFailUpdateArticles(withError: err) // Notify V
         }
         
     }
@@ -70,7 +70,7 @@ struct APIViewModel {
 
             // 2. Get image data from document directory or download it from imageURL
             var imageData: Data?
-            if let image = FileDataManager.getImage(of: fullFilename) {
+            if let image = FileDataManager.getImage(of: fullFilename) { // Service provider
                 JKLog.log(message: "Image found")
                 imageData = image
             } else { // TODO: Ask if it's bad approach that cause slow performance. If so, move it to VC, (maybe)modify business model
@@ -98,13 +98,13 @@ struct APIViewModel {
     func saveImage(for title: String, publishedAt: String, withExtension: String, imageData: Data) {
         let fullFilename = generateFullFilename(source1: title, source2: publishedAt, fileExtension: withExtension)
         
-        FileDataManager.saveImage(of: fullFilename, withImage: imageData)
+        FileDataManager.saveImage(of: fullFilename, withImage: imageData) // Service provider
     }
     
     // Helper function to generate full file name with extension to use in FileManager related task
     private func generateFullFilename(source1: String, source2:String, fileExtension: String) -> String {
         let fullFileName = "\(source1)_\(source2).\(fileExtension)"
-        return FileDataManager.updateFilenameToProperFormat(from: fullFileName)
+        return FileDataManager.updateFilenameToProperFormat(from: fullFileName) // Service provider helper func
         
     }
     

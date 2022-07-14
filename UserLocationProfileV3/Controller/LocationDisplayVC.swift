@@ -16,8 +16,8 @@ class LocationDisplayVC: UIViewController, LocationManagerDelegate, APIViewModel
     @IBOutlet weak var keywordTF: UITextField!
     @IBOutlet weak var articlesTV: UITableView!
     
-    let locationManager = LocationManager.shared
-    var apiComminicator = APIViewModel()
+    let locationManager = LocationManager.shared // Service provider
+    var apiComminicator = APIViewModel() // owns
     var articles = [ArticleToDisplay]() // datasource for articlesTV
     
     var targetUrlStr: String?

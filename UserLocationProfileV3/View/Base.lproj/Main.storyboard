@@ -85,6 +85,7 @@
                     <connections>
                         <segue destination="p4w-bd-jqd" kind="relationship" relationship="viewControllers" id="M2b-1i-po1"/>
                         <segue destination="GCJ-iz-fL8" kind="relationship" relationship="viewControllers" id="Jh3-of-6Mp"/>
+                        <segue destination="yBr-o1-P6E" kind="relationship" relationship="viewControllers" id="e57-iJ-M78"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jy8-1g-K51" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -414,6 +415,36 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Jpz-o9-I8f" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1365" y="502"/>
+        </scene>
+        <!--Item-->
+        <scene sceneID="2aQ-Gp-L03">
+            <objects>
+                <viewController id="yBr-o1-P6E" customClass="MapVC" customModule="UserLocationProfileV3" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="VFx-NO-tKo">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="ftp-a4-zHe">
+                                <rect key="frame" x="0.0" y="88" width="414" height="725"/>
+                            </mapView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="1eP-Dv-nNg"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="1eP-Dv-nNg" firstAttribute="bottom" secondItem="ftp-a4-zHe" secondAttribute="bottom" id="d3H-pK-RJi"/>
+                            <constraint firstItem="ftp-a4-zHe" firstAttribute="top" secondItem="1eP-Dv-nNg" secondAttribute="top" id="hgA-Ca-yDx"/>
+                            <constraint firstItem="1eP-Dv-nNg" firstAttribute="trailing" secondItem="ftp-a4-zHe" secondAttribute="trailing" id="pBC-Dl-tUB"/>
+                            <constraint firstItem="ftp-a4-zHe" firstAttribute="leading" secondItem="1eP-Dv-nNg" secondAttribute="leading" id="sHy-KF-xdS"/>
+                        </constraints>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Item" id="RZy-Ya-YLM"/>
+                    <connections>
+                        <outlet property="mapView" destination="ftp-a4-zHe" id="TZb-ri-NCM"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="RfR-IP-vvm" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1365" y="1249"/>
         </scene>
         <!--Profile-->
         <scene sceneID="TEn-OJ-JUt">

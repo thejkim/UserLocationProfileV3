@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		740EA98E287FA93F001A9C69 /* MapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 740EA98D287FA93F001A9C69 /* MapVC.swift */; };
 		7412D0462869058B0028AAD5 /* NetworkingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7412D0452869058B0028AAD5 /* NetworkingManager.swift */; };
 		7412D04828690D690028AAD5 /* FileDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7412D04728690D690028AAD5 /* FileDataManager.swift */; };
 		7412D059286B65FA0028AAD5 /* Articles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7412D058286B65FA0028AAD5 /* Articles.swift */; };
@@ -35,6 +36,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		740EA98D287FA93F001A9C69 /* MapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapVC.swift; sourceTree = "<group>"; };
 		7412D0452869058B0028AAD5 /* NetworkingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingManager.swift; sourceTree = "<group>"; };
 		7412D04728690D690028AAD5 /* FileDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDataManager.swift; sourceTree = "<group>"; };
 		7412D058286B65FA0028AAD5 /* Articles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Articles.swift; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 				743599962855BFFA008800CE /* LocationDisplayVC.swift */,
 				743599942855BFFA008800CE /* LocationServiceAuthorizationVC.swift */,
 				743599952855BFFA008800CE /* UserProtileVC.swift */,
+				740EA98D287FA93F001A9C69 /* MapVC.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -248,6 +251,7 @@
 				743599822855BF8F008800CE /* UserLocationProfileV3.xcdatamodeld in Sources */,
 				745AEF27285A088100F658DE /* LoadUrlVC.swift in Sources */,
 				743599982855BFFA008800CE /* LocationManager.swift in Sources */,
+				740EA98E287FA93F001A9C69 /* MapVC.swift in Sources */,
 				745AEF212859F8A300F658DE /* ArticleCell.swift in Sources */,
 				7412D05E286D4B6A0028AAD5 /* APIViewModel.swift in Sources */,
 				7412D059286B65FA0028AAD5 /* Articles.swift in Sources */,

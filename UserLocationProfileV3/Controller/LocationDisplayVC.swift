@@ -9,6 +9,9 @@ import UIKit
 import CoreLocation
 
 class LocationDisplayVC: UIViewController, LocationManagerDelegate, APIViewModelDelegate, UITextFieldDelegate {
+    func locationDidUpdateWith(location: CLLocation?) {
+        // NOT USING HERE. CURRENTLY TESTING MAPKIT WITH THIS DELEGATE
+    }
     
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var stateNameLabel: UILabel!

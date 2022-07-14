@@ -9,6 +9,7 @@ import CoreLocation
 
 protocol LocationManagerDelegate: AnyObject { // AnyObject: to ensure delegate is weak reference
     func locationDidUpdateWith(city: String, state: String, country: String, countryCode: String)
+    func locationDidUpdateWith(location: CLLocation?)
 }
 
 class LocationManager : NSObject {
@@ -148,6 +149,8 @@ extension LocationManager: CLLocationManagerDelegate {
         if let lastLocation = locations.last {
             JKLog.log(message: "long: \(lastLocation.coordinate.longitude) | lat: \(lastLocation.coordinate.latitude)")
         }
+        // MARK: MapKit Practice - Notify location update to delegator
+        self.delegate?.locationDidUpdateWith(location: locations.last)
         // convert lon,lat to address
         DispatchQueue.global(qos: .userInteractive).async {
             JKLog.log(message: "\(Thread.current)") // MARK: global queue
